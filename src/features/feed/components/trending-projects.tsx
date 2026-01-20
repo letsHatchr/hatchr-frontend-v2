@@ -65,7 +65,7 @@ export function TrendingProjects() {
                             {/* Watchers */}
                             <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
                                 <Eye className="h-3 w-3" />
-                                <span>{project.watchers ?? 0}</span>
+                                <span>{project.followers?.length ?? 0}</span>
                             </div>
                         </a>
                     ))

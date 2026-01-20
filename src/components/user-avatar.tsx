@@ -66,7 +66,7 @@ export function UserAvatar({
             />
             <AvatarFallback
                 className="bg-primary text-primary-foreground font-medium"
-                delayMs={600}
+                delay={600}
             >
                 {initials}
             </AvatarFallback>

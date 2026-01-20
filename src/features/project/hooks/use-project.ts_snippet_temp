@@ -1,0 +1,13 @@
+
+/**
+ * Fetch projects the user is watching
+ */
+export function useWatchedProjects() {
+    return useQuery({
+        queryKey: projectKeys.watching,
+        queryFn: async () => {
+            const { data } = await api.get<{ success: boolean; projects: Project[] }>('/projects/watching');
+            return data.projects;
+        },
+    });
+}

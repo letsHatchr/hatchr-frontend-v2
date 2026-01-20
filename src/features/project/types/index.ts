@@ -5,6 +5,7 @@ export interface Project {
     description: string;
     coverImage?: string;
     category: string;
+    categories?: string[];
     tags: string[];
     user: {
         _id: string;
@@ -13,7 +14,7 @@ export interface Project {
         avatar?: string;
     };
     partners: Partner[];
-    watchers: string[]; // Array of user IDs - was "followers" in backend
+    followers: string[]; // Array of user IDs
     posts: string[]; // Array of post IDs
     files: ProjectFile[];
     isArchived: boolean;
@@ -84,7 +85,17 @@ export interface ProjectPost {
     hasDownvoted?: boolean;
     upvoteCount?: number;
     downvoteCount?: number;
+    files?: Array<{
+        _id: string;
+        fileName: string;
+        originalFileName: string;
+        fileType: string;
+        fileSize: number;
+        r2Key?: string;
+        uploadedBy: string;
+    }>;
     createdAt: string;
+    updatedAt: string;
 }
 
 export interface ProjectPostsResponse {

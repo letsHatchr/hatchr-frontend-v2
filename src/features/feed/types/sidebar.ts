@@ -15,7 +15,7 @@ export interface TrendingProject {
     title: string;
     slug: string;
     coverImage?: string;
-    watchers: number;
+    followers: string[];
     user: {
         _id: string;
         name: string;

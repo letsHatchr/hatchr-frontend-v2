@@ -35,3 +35,4 @@ export { FollowersModal } from './components/followers-modal';
 
 // Pages
 export { ProfilePage } from './pages/profile';
+export { SettingsProfilePage } from './pages/settings-profile-page';

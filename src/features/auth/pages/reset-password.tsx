@@ -12,19 +12,24 @@ import { Logo } from '@/components/logo';
 import { toast } from '@/lib/toast';
 import api from '@/lib/api';
 
-interface ResetPasswordSearch {
-    token?: string;
-}
+
 
 export function ResetPasswordPage() {
     const navigate = useNavigate();
-    const { token } = useSearch({ from: '/reset-password' }) as ResetPasswordSearch;
+    const { email } = useSearch({ from: '/reset-password' }) as { email?: string };
 
+    const [otp, setOtp] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
+    const [errors, setErrors] = useState<{ otp?: string; password?: string; confirmPassword?: string }>({});
+
+    // If no email provided, redirect back to forgot password
+    if (!email) {
+        navigate({ to: '/forgot-password' });
+        return null;
+    }
 
     const passwordChecks = {
         length: password.length >= 6,
@@ -34,7 +39,13 @@ export function ResetPasswordPage() {
     };
 
     const validateForm = (): boolean => {
-        const newErrors: { password?: string; confirmPassword?: string } = {};
+        const newErrors: { otp?: string; password?: string; confirmPassword?: string } = {};
+
+        if (!otp) {
+            newErrors.otp = 'Verification code is required';
+        } else if (otp.length !== 6) {
+            newErrors.otp = 'Code must be 6 digits';
+        }
 
         if (!password) {
             newErrors.password = 'Password is required';
@@ -57,30 +68,23 @@ export function ResetPasswordPage() {
 
         if (!validateForm()) return;
 
-        if (!token) {
-            toast.error('Invalid reset link', {
-                description: 'Please request a new password reset.',
-            });
-            navigate({ to: '/forgot-password' });
-            return;
-        }
-
         setIsLoading(true);
 
         try {
             await api.post('/auth/reset-password', {
-                token,
-                password,
+                email,
+                otp,
+                newPassword: password,
             });
 
-            toast.success('Password reset!', {
+            toast.success('Password reset successfully!', {
                 description: 'You can now sign in with your new password.',
             });
             navigate({ to: '/login' });
 
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
-            const message = err.response?.data?.message || 'Failed to reset password.';
+            const message = err.response?.data?.message || 'Failed to reset password. Code might be expired.';
             toast.error('Reset failed', { description: message });
         } finally {
             setIsLoading(false);
@@ -100,13 +104,36 @@ export function ResetPasswordPage() {
                     <CardHeader className="text-center">
                         <CardTitle className="text-xl">Reset your password</CardTitle>
                         <CardDescription>
-                            Enter your new password below
+                            Enter the code sent to <span className="font-medium text-foreground">{email}</span> and your new password.
                         </CardDescription>
                     </CardHeader>
 
                     <CardContent>
                         <form onSubmit={handleSubmit}>
                             <div className="grid gap-6">
+                                {/* OTP Input */}
+                                <div className="grid gap-2">
+                                    <Label htmlFor="otp">Verification Code</Label>
+                                    <Input
+                                        id="otp"
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={6}
+                                        placeholder="Enter 6-digit code"
+                                        value={otp}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                            setOtp(value);
+                                            if (errors.otp) setErrors(prev => ({ ...prev, otp: undefined }));
+                                        }}
+                                        disabled={isLoading}
+                                        className={cn('text-center tracking-widest text-lg', errors.otp && 'border-destructive')}
+                                    />
+                                    {errors.otp && (
+                                        <p className="text-sm text-destructive">{errors.otp}</p>
+                                    )}
+                                </div>
+
                                 {/* New Password */}
                                 <div className="grid gap-2">
                                     <Label htmlFor="password">New Password</Label>

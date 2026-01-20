@@ -32,6 +32,6 @@ export function useTrendingProjects(limit: number = 5) {
             });
             return response.data;
         },
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 0, // Always fetch fresh data for trending counts
     });
 }

@@ -15,7 +15,8 @@ export function useFeedPosts(params: FeedParams = {}) {
     return useInfiniteQuery({
         queryKey: postKeys.feed(params),
         queryFn: async ({ pageParam = 1 }) => {
-            const response = await api.get<PostsResponse>('/posts', {
+            const endpoint = params.type === 'following' ? '/posts/following' : '/posts';
+            const response = await api.get<PostsResponse>(endpoint, {
                 params: {
                     page: pageParam,
                     limit: params.limit || 10,
@@ -26,12 +27,46 @@ export function useFeedPosts(params: FeedParams = {}) {
             return response.data;
         },
         getNextPageParam: (lastPage) => {
-            if (lastPage.page < lastPage.totalPages) {
-                return lastPage.page + 1;
+            if (lastPage.pagination?.hasMore) {
+                return lastPage.pagination.currentPage + 1;
             }
             return undefined;
         },
         initialPageParam: 1,
+    });
+}
+
+// Create a new post
+export function useCreatePost() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (vars: FormData) => {
+            const { data } = await api.post('/posts', vars, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: postKeys.all });
+        },
+    });
+}
+
+// Update a post
+export function useUpdatePost() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, data }: { id: string; data: FormData }) => {
+            const { data: res } = await api.put(`/posts/${id}`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return res;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: postKeys.all });
+        },
     });
 }
 
@@ -66,11 +101,41 @@ export function useCommentOnPost() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ postId, content }: { postId: string; content: string }) => {
-            const response = await api.post(`/comments`, {
-                postId,
-                content,
+        mutationFn: async ({ postId, content, parentCommentId }: { postId: string; content: string; parentCommentId?: string }) => {
+            const response = await api.post(`/posts/${postId}/comment`, {
+                text: content, // Backend expects 'text', not 'content'
+                parentCommentId,
             });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: postKeys.all });
+        },
+    });
+}
+
+// Delete a comment
+export function useDeleteComment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ postId, commentId }: { postId: string; commentId: string }) => {
+            const response = await api.delete(`/posts/${postId}/comments/${commentId}`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: postKeys.all });
+        },
+    });
+}
+
+// Delete a post
+export function useDeletePost() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (postId: string) => {
+            const response = await api.delete(`/posts/${postId}`);
             return response.data;
         },
         onSuccess: () => {
@@ -104,8 +169,8 @@ export function useProjectPosts(projectSlug: string) {
             return response.data;
         },
         getNextPageParam: (lastPage) => {
-            if (lastPage.page < lastPage.totalPages) {
-                return lastPage.page + 1;
+            if (lastPage.pagination?.hasMore) {
+                return lastPage.pagination.currentPage + 1;
             }
             return undefined;
         },

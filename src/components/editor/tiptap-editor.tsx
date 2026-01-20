@@ -51,9 +51,9 @@ interface ToolbarButtonProps {
 }
 
 const ToolbarButton = ({ onClick, isActive, disabled, children, tooltip }: ToolbarButtonProps) => (
-    <TooltipProvider delayDuration={300}>
+    <TooltipProvider delay={300}>
         <Tooltip>
-            <TooltipTrigger asChild>
+            <TooltipTrigger>
                 <Button
                     type="button"
                     variant="ghost"

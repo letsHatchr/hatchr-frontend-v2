@@ -1,6 +1,6 @@
 'use client';
 
-import { Twitter, Linkedin, Instagram, Github, Globe, Link as LinkIcon } from 'lucide-react';
+import { Twitter, Linkedin, Instagram, Github, Globe, Link as LinkIcon, Brain } from 'lucide-react';
 import type { SocialLinks as SocialLinksType } from '../types';
 
 interface SocialLinksDisplayProps {
@@ -14,6 +14,7 @@ const socialIcons = {
     github: Github,
     website: Globe,
     customLink: LinkIcon,
+    huggingface: Brain,
 };
 
 const socialLabels: Record<string, string> = {
@@ -23,6 +24,7 @@ const socialLabels: Record<string, string> = {
     github: 'GitHub',
     website: 'Website',
     customLink: 'Link',
+    huggingface: 'Hugging Face',
 };
 
 export function SocialLinks({ socialLinks }: SocialLinksDisplayProps) {

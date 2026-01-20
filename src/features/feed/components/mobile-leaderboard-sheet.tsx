@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Trophy, Medal, Award } from 'lucide-react';
+import { Trophy, Medal, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,16 +23,18 @@ export function MobileLeaderboardSheet() {
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-2 lg:hidden"
-                >
-                    <Trophy className="h-4 w-4" />
-                    <span>Leaderboard</span>
-                </Button>
-            </SheetTrigger>
+            <SheetTrigger
+                render={
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-2 lg:hidden"
+                    >
+                        <Trophy className="h-4 w-4" />
+                        <span>Leaderboard</span>
+                    </Button>
+                }
+            />
             <SheetContent side="bottom" className="h-[80vh] rounded-t-xl">
                 <SheetHeader className="pb-4">
                     <SheetTitle className="text-center">
@@ -111,7 +113,7 @@ export function MobileLeaderboardSheet() {
                     </div>
                 </div>
             </SheetContent>
-        </Sheet>
+        </Sheet >
     );
 }
 

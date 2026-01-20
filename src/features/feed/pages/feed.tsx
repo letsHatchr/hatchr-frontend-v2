@@ -1,19 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from '@tanstack/react-router';
-import { Loader2, Plus } from 'lucide-react';
+
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PostCardSkeleton } from '@/components/loading';
-import { Logo } from '@/components/logo';
-import { UserAvatar } from '@/components/user-avatar';
+
 import { useAuthStore } from '@/store';
 import { PostCard } from '../components/post-card';
 import { TopInnovators } from '../components/top-innovators';
 import { TrendingProjects } from '../components/trending-projects';
-import { MobileBottomNav } from '../components/mobile-bottom-nav';
+
 import { useFeedPosts } from '../hooks/use-posts';
 import type { FeedParams } from '../types';
 
@@ -28,7 +27,7 @@ const sortOptions: { value: SortOption; label: string }[] = [
 ];
 
 export function FeedPage() {
-    const { user, isAuthenticated } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const [activeTab, setActiveTab] = useState<FeedTab>('forYou');
     const [sortBy, setSortBy] = useState<SortOption>('best');
 
@@ -78,51 +77,7 @@ export function FeedPage() {
     return (
         <div className="min-h-screen bg-background pb-20 lg:pb-0">
             {/* Navbar */}
-            <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
-                    <Logo size="md" linkTo="/" />
-
-                    {/* Desktop Actions */}
-                    <div className="hidden lg:flex items-center gap-3">
-                        {isAuthenticated ? (
-                            <>
-                                <Button variant="outline" size="sm" className="gap-2">
-                                    <Plus className="h-4 w-4" />
-                                    Create Post
-                                </Button>
-                                <Button size="sm" className="gap-2">
-                                    <Plus className="h-4 w-4" />
-                                    Hatch Project
-                                </Button>
-                            </>
-                        ) : null}
-                    </div>
-
-                    {isAuthenticated && user ? (
-                        <div className="flex items-center gap-3">
-                            <a href={`/${user.username}`} className="hidden lg:block">
-                                <UserAvatar
-                                    src={user.avatar}
-                                    name={user.name}
-                                    username={user.username}
-                                    size="sm"
-                                />
-                            </a>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <Link to="/login">
-                                <Button variant="ghost" size="sm">
-                                    Log in
-                                </Button>
-                            </Link>
-                            <Link to="/signup">
-                                <Button size="sm">Sign up</Button>
-                            </Link>
-                        </div>
-                    )}
-                </div>
-            </header>
+            {/* Navbar removed - moved to global layout */}
 
             {/* Main Layout - 3 Column on Desktop with full-width sidebars */}
             <div className="w-full px-4 py-6 lg:px-6 xl:px-8 lg:grid lg:grid-cols-[minmax(320px,1fr)_minmax(auto,600px)_minmax(320px,1fr)] lg:gap-6">
@@ -230,7 +185,7 @@ export function FeedPage() {
             </div>
 
             {/* Mobile Bottom Navigation */}
-            <MobileBottomNav />
+            {/* Mobile Bottom Navigation removed - moved to global layout */}
         </div>
     );
 }

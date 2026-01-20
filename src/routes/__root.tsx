@@ -11,22 +11,38 @@ import {
     ForgotPasswordPage,
     ResetPasswordPage,
     GuestRoute,
+    ProtectedRoute,
 } from '@/features/auth';
 
 // Feed
-import { FeedPage } from '@/features/feed';
+import { FeedPage, PostPage } from '@/features/feed';
+import { LeaderboardPage } from '@/features/feed/pages/leaderboard-page';
+import { CreatePage } from '@/features/feed/pages/create-page';
 
 // ProfilePage
-import { ProfilePage } from '@/features/profile';
+import { ProfilePage, SettingsProfilePage } from '@/features/profile';
 
 // Project
-import { ProjectPage, ProjectFilesPage } from '@/features/project';
+import { ProjectPage } from '@/features/project/pages/project-page';
+import { ProjectFilesPage } from '@/features/project/pages/project-files-page';
+import { WatchingPage } from '@/features/project/pages/watching-page';
+import { NotificationsPage } from '@/features/notifications/pages/notifications-page';
+import { InvitationsPage } from '@/features/project/pages/invitations-page';
+
+
+// Search
+import { SearchPage } from './search';
 
 // Root layout
+import { Navbar } from '@/components/navbar';
+import { MobileBottomNav } from '@/components/mobile-bottom-nav';
+
 const rootRoute = createRootRoute({
     component: () => (
         <div className="min-h-screen bg-background text-foreground">
+            <Navbar />
             <Outlet />
+            <MobileBottomNav />
             <Toaster
                 position="top-right"
                 richColors
@@ -89,7 +105,7 @@ const resetPasswordRoute = createRoute({
     path: '/reset-password',
     component: ResetPasswordPage,
     validateSearch: (search: Record<string, unknown>) => ({
-        token: search.token as string | undefined,
+        email: search.email as string | undefined,
     }),
 });
 
@@ -100,11 +116,25 @@ const feedRoute = createRoute({
     component: FeedPage,
 });
 
+// Create route (for mobile bottom nav)
+const createPageRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/create',
+    component: () => (
+        <ProtectedRoute>
+            <CreatePage />
+        </ProtectedRoute>
+    ),
+});
+
 // Project routes
 const projectRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/project/$slug',
     component: ProjectPage,
+    validateSearch: (search: Record<string, unknown>) => ({
+        tab: (search.tab as string) || 'timeline',
+    }),
 });
 
 const projectFilesRoute = createRoute({
@@ -113,11 +143,79 @@ const projectFilesRoute = createRoute({
     component: ProjectFilesPage,
 });
 
+// Watching route
+const watchingRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/watching',
+    component: () => (
+        <ProtectedRoute>
+            <WatchingPage />
+        </ProtectedRoute>
+    ),
+});
+
+// Notifications route
+const notificationsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/notifications',
+    component: () => (
+        <ProtectedRoute>
+            <NotificationsPage />
+        </ProtectedRoute>
+    ),
+});
+
+// Invitations route
+const invitationsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/invitations',
+    component: () => (
+        <ProtectedRoute>
+            <InvitationsPage />
+        </ProtectedRoute>
+    ),
+});
+
+// Settings route
+const settingsProfileRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/settings/profile',
+    component: () => (
+        <ProtectedRoute>
+            <SettingsProfilePage />
+        </ProtectedRoute>
+    ),
+});
+
+// Search route
+const searchRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/search',
+    component: SearchPage,
+    validateSearch: (search: Record<string, unknown>) => ({
+        q: (search.q as string) || '',
+    }),
+});
+
+// Leaderboard route (must come before profile catch-all)
+const leaderboardRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/leaderboard',
+    component: LeaderboardPage,
+});
+
 // Profile route (user profile with @username or just username)
 const profileRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/$username',
     component: ProfilePage,
+});
+
+// Post route
+const postRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/post/$slug',
+    component: PostPage,
 });
 
 // Export the route tree
@@ -129,7 +227,16 @@ export const routeTree = rootRoute.addChildren([
     forgotPasswordRoute,
     resetPasswordRoute,
     feedRoute,
+    postRoute,
     projectRoute,
     projectFilesRoute,
+    settingsProfileRoute,
+    watchingRoute,
+
+    notificationsRoute,
+    invitationsRoute,
+    searchRoute,
+    createPageRoute,  // Must come before profileRoute
+    leaderboardRoute, // Must come before profileRoute
     profileRoute,
 ]);

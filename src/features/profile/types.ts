@@ -8,6 +8,7 @@ export interface User {
     avatar?: string;
     bannerImage?: string;
     bio?: string;
+    about?: string;
     hatchPoints: number;
     followers: string[];
     following: string[];
@@ -24,11 +25,12 @@ export interface User {
 }
 
 export interface Achievement {
-    _id: string;
+    _id?: string;
     title: string;
     description?: string;
     icon?: string;
-    earnedAt: string;
+    earnedAt?: string;
+    link?: string;
 }
 
 export interface SocialLinks {
@@ -38,6 +40,7 @@ export interface SocialLinks {
     github?: string;
     website?: string;
     customLink?: string;
+    huggingface?: string;
 }
 
 export interface ProfileTheme {
@@ -58,15 +61,17 @@ export interface Project {
     slug: string;
     description?: string;
     coverImage?: string;
+    category?: string;
+    categories?: string[];
     user: {
         _id: string;
         name: string;
         username: string;
         avatar?: string;
     };
-    watchers: string[];
-    likes?: number;
-    comments?: number;
+    followers: string[];
+    totalUpvotes?: number;
+    totalComments?: number;
     postsCount?: number;
     tags?: string[];
     isArchived?: boolean;

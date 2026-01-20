@@ -23,10 +23,11 @@ export interface PostMedia {
 
 export interface PostComment {
     _id: string;
-    content: string;
-    user: PostAuthor;
+    text: string;
+    user: PostAuthor | null;
     createdAt: string;
     replies?: PostComment[];
+    isDeleted?: boolean;
 }
 
 export interface Post {
@@ -42,6 +43,15 @@ export interface Post {
     upvotes: string[];
     downvotes: string[];
     comments: PostComment[];
+    files?: {
+        _id: string;
+        fileName: string;
+        originalFileName: string;
+        fileType: string;
+        fileSize: number;
+        r2Key: string;
+        uploadedBy: string;
+    }[];
     createdAt: string;
     updatedAt: string;
 }
@@ -49,9 +59,13 @@ export interface Post {
 export interface PostsResponse {
     success: boolean;
     posts: Post[];
-    page: number;
-    totalPages: number;
-    totalPosts: number;
+    pagination: {
+        currentPage: number;
+        totalPages?: number;
+        totalPosts?: number;
+        hasMore: boolean;
+        limit: number;
+    };
 }
 
 export interface FeedParams {

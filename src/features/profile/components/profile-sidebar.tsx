@@ -50,8 +50,8 @@ export function ProfileSidebar({
             </div>
 
             <CardContent className="relative pt-0 pb-3 px-4">
-                {/* Avatar - overlapping banner */}
-                <div className="-mt-10 mb-2">
+                {/* Avatar & Name Row - reduced overlap */}
+                <div className="flex flex-row items-end gap-3 -mt-10 sm:-mt-12 mb-4 px-1">
                     <img
                         src={
                             user.avatar && user.avatar.trim() !== ''
@@ -59,18 +59,19 @@ export function ProfileSidebar({
                                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username)}&size=80&background=F5973F&color=fff`
                         }
                         alt={user.username}
-                        className="w-20 h-20 rounded-full object-cover border-4 border-background shadow-lg"
+                        className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-lg z-10"
                         onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.onerror = null;
                             target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username)}&size=80&background=F5973F&color=fff`;
                         }}
                     />
-                </div>
 
-                {/* Name & Username */}
-                <h2 className="text-base font-bold">{user.name || user.username}</h2>
-                <p className="text-xs text-muted-foreground mb-3">{user.username}</p>
+                    <div className="pb-2 min-w-0">
+                        <h2 className="text-xl font-bold truncate">{user.name || user.username}</h2>
+                        <p className="text-sm text-muted-foreground truncate">@{user.username}</p>
+                    </div>
+                </div>
 
                 {/* Stats Row - Compact */}
                 <div className="grid grid-cols-2 gap-2 mb-3">
@@ -84,20 +85,20 @@ export function ProfileSidebar({
                     </div>
                 </div>
 
-                {/* Following/Followers */}
-                <div className="flex items-center justify-center gap-2 text-sm mb-4">
+                {/* Following/Followers - improved touch targets */}
+                <div className="flex items-center justify-center gap-3 text-sm mb-4">
                     <button
                         onClick={onFollowingClick}
-                        className="hover:text-primary transition-colors"
+                        className="hover:text-primary transition-colors py-2 px-3 -my-2 -mx-1 rounded-md hover:bg-accent min-h-[44px] flex items-center"
                     >
-                        Following <span className="font-semibold">{user.following?.length || 0}</span>
+                        Following <span className="font-semibold ml-1">{user.following?.length || 0}</span>
                     </button>
                     <span className="text-muted-foreground">|</span>
                     <button
                         onClick={onFollowersClick}
-                        className="hover:text-primary transition-colors"
+                        className="hover:text-primary transition-colors py-2 px-3 -my-2 -mx-1 rounded-md hover:bg-accent min-h-[44px] flex items-center"
                     >
-                        Followers <span className="font-semibold">{user.followers?.length || 0}</span>
+                        Followers <span className="font-semibold ml-1">{user.followers?.length || 0}</span>
                     </button>
                 </div>
 
@@ -121,8 +122,8 @@ export function ProfileSidebar({
 
                 {/* Interest Tags */}
                 {user.interests && user.interests.length > 0 && (
-                    <div className="bg-primary/10 rounded-lg p-3 mb-4">
-                        <div className="flex flex-wrap gap-2">
+                    <div className="bg-primary/10 rounded-lg p-3 mb-4 text-center">
+                        <div className="flex flex-wrap justify-center gap-2">
                             {user.interests.map((interest, idx) => (
                                 <span key={idx} className="text-sm text-foreground">
                                     {interest}
@@ -135,8 +136,10 @@ export function ProfileSidebar({
 
                 {/* Bio */}
                 <div className="mb-4">
-                    <h4 className="text-sm font-medium text-center mb-2">Bio</h4>
-                    {/* Placeholder for social link icons */}
+                    <p className="text-sm text-muted-foreground text-center mb-3">
+                        {user.bio || "No bio yet."}
+                    </p>
+                    {/* Social Links */}
                     <div className="flex justify-center gap-2 mb-3">
                         <SocialLinks socialLinks={user.socialLinks} />
                     </div>
@@ -145,14 +148,14 @@ export function ProfileSidebar({
                 {/* Achievements */}
                 {user.achievements && user.achievements.length > 0 && (
                     <div className="bg-primary/10 rounded-lg p-3 mb-4">
-                        <h4 className="text-sm font-semibold text-primary text-center mb-2">Achievements</h4>
-                        <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-primary mb-2 pl-1">Achievements</h4>
+                        <ul className="list-disc pl-5 space-y-1">
                             {user.achievements.slice(0, 3).map((achievement) => (
-                                <div key={achievement._id} className="text-xs text-center">
+                                <li key={achievement._id} className="text-xs text-left">
                                     {achievement.title}
-                                </div>
+                                </li>
                             ))}
-                        </div>
+                        </ul>
                     </div>
                 )}
 

@@ -30,8 +30,11 @@ api.interceptors.response.use(
     (error: AxiosError) => {
         if (error.response?.status === 401) {
             // Token expired or invalid - logout user
+            // We use the store's logout action which clears the state
+            // Components (like ProtectedRoute) will reactively redirect to login
+            // We DO NOT force a window.location.reload() here as it causes restart loops
+            // with persisted state.
             useAuthStore.getState().logout();
-            window.location.href = '/login';
         }
         return Promise.reject(error);
     }

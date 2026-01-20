@@ -1,13 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useParams, useNavigate, Link } from '@tanstack/react-router';
-import { Plus } from 'lucide-react';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/store';
-import { Logo } from '@/components/logo';
-import { UserAvatar } from '@/components/user-avatar';
 import { ProfileSidebar } from '../components/profile-sidebar';
 import { AboutSection } from '../components/about-section';
 import { HorizontalProjectCard } from '../components/horizontal-project-card';
@@ -22,7 +19,7 @@ import {
 export function ProfilePage() {
     const { username } = useParams({ from: '/$username' });
     const navigate = useNavigate();
-    const { user: currentUser, isAuthenticated } = useAuthStore();
+    const { user: currentUser } = useAuthStore();
 
     // State
     const [showFollowersModal, setShowFollowersModal] = useState(false);
@@ -68,7 +65,7 @@ export function ProfilePage() {
     };
 
     const handleEditProfile = () => {
-        window.location.href = '/settings?tab=profile';
+        navigate({ to: '/settings/profile' });
     };
 
     const openFollowersModal = (tab: 'followers' | 'following') => {
@@ -80,12 +77,6 @@ export function ProfilePage() {
     if (profileLoading) {
         return (
             <div className="min-h-screen bg-background">
-                {/* Navbar */}
-                <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
-                        <Logo size="md" linkTo="/" />
-                    </div>
-                </header>
                 <div className="max-w-6xl mx-auto px-4 py-6">
                     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
                         <Skeleton className="h-[500px] rounded-lg" />
@@ -103,12 +94,6 @@ export function ProfilePage() {
     if (profileError || !user) {
         return (
             <div className="min-h-screen bg-background">
-                {/* Navbar */}
-                <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
-                        <Logo size="md" linkTo="/" />
-                    </div>
-                </header>
                 <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 56px)' }}>
                     <div className="text-center">
                         <h1 className="text-2xl font-bold mb-2">User not found</h1>
@@ -126,53 +111,6 @@ export function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* Navbar */}
-            <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
-                    <Logo size="md" linkTo="/" />
-
-                    {/* Desktop Actions */}
-                    <div className="hidden lg:flex items-center gap-3">
-                        {isAuthenticated ? (
-                            <>
-                                <Button variant="outline" size="sm" className="gap-2">
-                                    <Plus className="h-4 w-4" />
-                                    Create Post
-                                </Button>
-                                <Button size="sm" className="gap-2">
-                                    <Plus className="h-4 w-4" />
-                                    Hatch Project
-                                </Button>
-                            </>
-                        ) : null}
-                    </div>
-
-                    {isAuthenticated && currentUser ? (
-                        <div className="flex items-center gap-3">
-                            <a href={`/${currentUser.username}`} className="hidden lg:block">
-                                <UserAvatar
-                                    src={currentUser.avatar}
-                                    name={currentUser.name}
-                                    username={currentUser.username}
-                                    size="sm"
-                                />
-                            </a>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <Link to="/login">
-                                <Button variant="ghost" size="sm">
-                                    Log in
-                                </Button>
-                            </Link>
-                            <Link to="/signup">
-                                <Button size="sm">Sign up</Button>
-                            </Link>
-                        </div>
-                    )}
-                </div>
-            </header>
-
             {/* Main Content */}
             <div className="max-w-6xl mx-auto px-4 py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-6">
@@ -194,7 +132,7 @@ export function ProfilePage() {
                     {/* Right Content */}
                     <main className="space-y-6">
                         {/* About Section */}
-                        <AboutSection bio={user.bio} name={user.name} />
+                        <AboutSection about={user.about} name={user.name} />
 
                         {/* Projects Section */}
                         <section>

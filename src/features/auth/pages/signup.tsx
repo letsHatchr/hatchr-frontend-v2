@@ -140,9 +140,9 @@ export function SignupPage() {
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
             <div className="flex w-full max-w-sm flex-col gap-6">
                 {/* Logo */}
-                <Link to="/" className="flex items-center gap-2 self-center font-medium">
-                    <Logo size="md" linkTo={undefined} />
-                </Link>
+                <div className="flex items-center gap-2 self-center font-medium">
+                    <Logo size="md" linkTo="/" />
+                </div>
 
                 {/* Signup Card */}
                 <Card>
@@ -242,17 +242,17 @@ export function SignupPage() {
                                         <p className="text-sm text-destructive">{errors.password}</p>
                                     )}
 
-                                    {/* Password strength */}
+                                    {/* Password strength - improved mobile readability */}
                                     {formData.password && (
-                                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                                            <span className={cn('flex items-center gap-1', passwordChecks.length ? 'text-green-500' : 'text-muted-foreground')}>
-                                                <Check className="h-3 w-3" /> 6+ chars
+                                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                                            <span className={cn('flex items-center gap-1.5', passwordChecks.length ? 'text-green-500' : 'text-muted-foreground')}>
+                                                <Check className="h-4 w-4" /> 6+ chars
                                             </span>
-                                            <span className={cn('flex items-center gap-1', passwordChecks.hasLetter ? 'text-green-500' : 'text-muted-foreground')}>
-                                                <Check className="h-3 w-3" /> Letter
+                                            <span className={cn('flex items-center gap-1.5', passwordChecks.hasLetter ? 'text-green-500' : 'text-muted-foreground')}>
+                                                <Check className="h-4 w-4" /> Letter
                                             </span>
-                                            <span className={cn('flex items-center gap-1', passwordChecks.hasNumber ? 'text-green-500' : 'text-muted-foreground')}>
-                                                <Check className="h-3 w-3" /> Number
+                                            <span className={cn('flex items-center gap-1.5', passwordChecks.hasNumber ? 'text-green-500' : 'text-muted-foreground')}>
+                                                <Check className="h-4 w-4" /> Number
                                             </span>
                                         </div>
                                     )}

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/store';
 import api from '@/lib/api';
 import type {
     UserProfileResponse,
@@ -112,6 +113,82 @@ export function useToggleKeyProject() {
         onSuccess: () => {
             // Invalidate projects to refresh the list
             queryClient.invalidateQueries({ queryKey: userKeys.all });
+        },
+    });
+}
+
+// Update user profile keys
+export function useUserUpdate() {
+    const queryClient = useQueryClient();
+    const setUser = useAuthStore((state) => state.setUser);
+
+    return useMutation({
+        mutationFn: async ({ userId, data }: { userId: string; data: Partial<any> }) => {
+            const response = await api.put(`/users/${userId}`, data);
+            return response.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: userKeys.profile(data.user?.username || '') });
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
+
+            // Update auth store with fresh user data
+            if (data.user) {
+                setUser(data.user);
+            }
+        },
+    });
+}
+
+// Upload Avatar
+export function useUploadAvatar() {
+    const queryClient = useQueryClient();
+    const setUser = useAuthStore((state) => state.setUser);
+
+    return useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append('avatar', file);
+            const response = await api.post('/users/avatar', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
+
+            // Update auth store with fresh user data containing new avatar
+            if (data.user) {
+                setUser(data.user);
+            }
+        },
+    });
+}
+
+// Upload Banner
+export function useUploadBanner() {
+    const queryClient = useQueryClient();
+    const setUser = useAuthStore((state) => state.setUser);
+
+    return useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append('banner', file);
+            const response = await api.post('/users/upload-banner', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
+
+            // Update auth store with fresh user data containing new banner
+            if (data.user) {
+                setUser(data.user);
+            }
         },
     });
 }

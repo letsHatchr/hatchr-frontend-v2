@@ -1,6 +1,6 @@
 'use client';
 
-import { Link, useRouterState } from '@tanstack/react-router';
+import { useRouterState } from '@tanstack/react-router';
 import { Home, Search, PlusSquare, Trophy, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store';

@@ -82,28 +82,28 @@ export function ProjectTimeline({
     return (
         <div className="space-y-0">
             {/* Timeline container with vertical line */}
-            <div className="relative">
+            <div className="relative max-w-2xl mx-auto">
                 {/* Vertical timeline line */}
                 {posts.length > 1 && (
-                    <div className="absolute left-4 sm:left-6 top-0 bottom-0 w-0.5 bg-border" />
+                    <div className="absolute left-[7px] sm:left-[11px] top-0 bottom-0 w-0.5 bg-border" />
                 )}
 
                 {/* Posts */}
                 {posts.map((post, index) => (
-                    <div key={post._id} className="relative flex gap-3 sm:gap-4 pb-6">
+                    <div key={post._id} className="relative flex gap-3 sm:gap-4 pb-6 w-full">
                         {/* Timeline dot */}
-                        <div className="relative flex-shrink-0">
+                        <div className="relative flex-shrink-0 pt-1">
                             <div
                                 className={cn(
-                                    'h-8 w-8 sm:h-12 sm:w-12 rounded-full flex items-center justify-center z-10 relative',
+                                    'h-4 w-4 sm:h-6 sm:w-6 rounded-full flex items-center justify-center z-10 relative',
                                     index === 0
-                                        ? 'bg-orange-500 ring-2 sm:ring-4 ring-orange-500/20'
-                                        : 'bg-muted border-2 border-border'
+                                        ? 'bg-orange-500 ring-2 ring-orange-500/20'
+                                        : 'bg-muted border border-border'
                                 )}
                             >
                                 <div
                                     className={cn(
-                                        'h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full',
+                                        'h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full',
                                         index === 0 ? 'bg-white' : 'bg-muted-foreground'
                                     )}
                                 />
@@ -128,7 +128,7 @@ export function ProjectTimeline({
                                     index === 0 && 'ring-2 ring-orange-500/20 rounded-lg'
                                 )}
                             >
-                                <PostCard post={post} showProject={false} />
+                                <PostCard post={post} showProject={false} variant="timeline" />
                             </div>
                         </div>
                     </div>

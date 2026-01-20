@@ -63,7 +63,7 @@ export function ProjectCard({ project, showKeyBadge = false }: ProjectCardProps)
                         {/* Watchers */}
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Eye className="h-4 w-4" />
-                            <span>{project.watchers?.length || 0}</span>
+                            <span>{project.followers?.length || 0}</span>
                         </div>
                     </div>
 

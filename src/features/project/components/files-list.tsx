@@ -1,3 +1,4 @@
+
 'use client';
 
 /**
@@ -6,7 +7,7 @@
  */
 
 import { useState } from 'react';
-import { Download, Trash2, Loader2, AlertCircle, File, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Download, Trash2, Loader2, AlertCircle, File, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -15,6 +16,7 @@ import { UserAvatar } from '@/components/user-avatar';
 import { useAuthStore } from '@/store';
 import { toast } from '@/lib/toast';
 import { useProjectFiles, useDownloadFile, useDeleteFile } from '../hooks/use-files';
+import { FilePreviewModal } from '@/components/file-preview-modal';
 import {
     getFileIcon,
     formatFileSize,
@@ -30,6 +32,7 @@ interface FilesListProps {
 
 export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
     const [page, setPage] = useState(1);
+    const [previewFile, setPreviewFile] = useState<any>(null);
     const { user: currentUser } = useAuthStore();
 
     const { data, isLoading, isError, refetch } = useProjectFiles(projectId, page);
@@ -141,7 +144,10 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                             <div className="flex items-start gap-3 sm:gap-4">
                                 {/* File icon */}
                                 <div className="flex-shrink-0">
-                                    <div className="h-10 w-10 sm:h-12 sm:w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                    <div
+                                        className="h-10 w-10 sm:h-12 sm:w-12 bg-primary/10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors"
+                                        onClick={() => setPreviewFile(file)}
+                                    >
                                         <FileIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                                     </div>
                                 </div>
@@ -150,7 +156,10 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-sm font-medium truncate mb-1">
+                                            <h4
+                                                className="text-sm font-medium truncate mb-1 cursor-pointer hover:underline hover:text-primary"
+                                                onClick={() => setPreviewFile(file)}
+                                            >
                                                 {file.originalFileName}
                                             </h4>
 
@@ -192,6 +201,17 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
 
                                         {/* Action buttons */}
                                         <div className="flex items-center gap-1 flex-shrink-0">
+                                            {/* Preview button */}
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPreviewFile(file)}
+                                                className="text-muted-foreground hover:text-foreground"
+                                                title="Preview"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+
                                             {/* Download button */}
                                             <Button
                                                 variant="ghost"
@@ -263,6 +283,12 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                     </div>
                 </div>
             )}
+
+            <FilePreviewModal
+                open={!!previewFile}
+                onOpenChange={(open) => !open && setPreviewFile(null)}
+                file={previewFile}
+            />
         </Card>
     );
 }

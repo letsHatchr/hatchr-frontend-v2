@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { Loader2, ArrowLeft, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { toast } from '@/lib/toast';
 import api from '@/lib/api';
 
 export function ForgotPasswordPage() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -44,11 +45,15 @@ export function ForgotPasswordPage() {
                 email: email.trim().toLowerCase(),
             });
 
-            setIsSubmitted(true);
-            toast.success('Reset link sent!', {
-                description: 'Check your email for the password reset link.',
+            toast.success('Reset code sent!', {
+                description: 'Check your email for the verification code.',
             });
 
+            // Navigate to reset password page with email
+            navigate({
+                to: '/reset-password',
+                search: { email: email.trim().toLowerCase() },
+            });
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
             const message = err.response?.data?.message || 'Failed to send reset link.';

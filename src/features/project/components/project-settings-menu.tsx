@@ -16,6 +16,7 @@ import {
     useUnarchiveProject,
     useDeleteProject,
 } from '../hooks/use-project';
+import { CreateProjectModal } from './create-project-modal';
 
 interface ProjectSettingsMenuProps {
     project: Project;
@@ -29,15 +30,19 @@ export function ProjectSettingsMenu({ project }: ProjectSettingsMenuProps) {
     const unarchiveMutation = useUnarchiveProject();
     const deleteMutation = useDeleteProject();
 
+    const [showEditModal, setShowEditModal] = useState(false);
+
     const handleEdit = () => {
-        // TODO: Navigate to edit project page or open edit modal
-        toast.info('Edit project feature coming soon');
+        setShowEditModal(true);
         setOpen(false);
     };
 
     const handleManageTeam = () => {
-        // TODO: Open team management modal
-        toast.info('Team management feature coming soon');
+        navigate({
+            to: '/project/$slug',
+            params: { slug: project.slug },
+            search: { tab: 'team' },
+        });
         setOpen(false);
     };
 
@@ -75,39 +80,49 @@ export function ProjectSettingsMenu({ project }: ProjectSettingsMenuProps) {
     };
 
     return (
-        <DropdownMenu open={open} onOpenChange={setOpen}>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Project Settings
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuItem onClick={handleEdit}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Project
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleManageTeam}>
-                    <Users className="mr-2 h-4 w-4" />
-                    Manage Team
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    onClick={handleArchive}
-                    disabled={archiveMutation.isPending || unarchiveMutation.isPending}
-                >
-                    <Archive className="mr-2 h-4 w-4" />
-                    {project.isArchived ? 'Unarchive' : 'Archive'}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    onClick={handleDelete}
-                    className="text-destructive focus:text-destructive"
-                    disabled={deleteMutation.isPending}
-                >
-                    <Trash className="mr-2 h-4 w-4" />
-                    {deleteMutation.isPending ? 'Deleting...' : 'Delete Project'}
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+                <DropdownMenuTrigger
+                    render={
+                        <Button variant="outline" className="w-full">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Project Settings
+                        </Button>
+                    }
+                />
+                <DropdownMenuContent align="start" className="w-56">
+                    <DropdownMenuItem onClick={handleEdit}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Project
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleManageTeam}>
+                        <Users className="mr-2 h-4 w-4" />
+                        Manage Team
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onClick={handleArchive}
+                        disabled={archiveMutation.isPending || unarchiveMutation.isPending}
+                    >
+                        <Archive className="mr-2 h-4 w-4" />
+                        {project.isArchived ? 'Unarchive' : 'Archive'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={handleDelete}
+                        className="text-destructive focus:text-destructive"
+                        disabled={deleteMutation.isPending}
+                    >
+                        <Trash className="mr-2 h-4 w-4" />
+                        Delete Project
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <CreateProjectModal
+                open={showEditModal}
+                onOpenChange={setShowEditModal}
+                project={project}
+            />
+        </>
     );
 }
