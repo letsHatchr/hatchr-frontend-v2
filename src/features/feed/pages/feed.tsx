@@ -80,7 +80,7 @@ export function FeedPage() {
             {/* Navbar removed - moved to global layout */}
 
             {/* Main Layout - 3 Column on Desktop with full-width sidebars */}
-            <div className="w-full px-4 py-6 lg:px-6 xl:px-8 lg:grid lg:grid-cols-[minmax(320px,1fr)_minmax(auto,600px)_minmax(320px,1fr)] lg:gap-6">
+            <div className="w-full px-0 py-0 sm:px-4 sm:py-6 lg:px-6 xl:px-8 lg:grid lg:grid-cols-[minmax(320px,1fr)_minmax(auto,600px)_minmax(320px,1fr)] lg:gap-6">
                 {/* Left Sidebar - Desktop only - extends to left edge */}
                 <aside className="hidden lg:flex lg:justify-end">
                     <div className="w-[320px] space-y-6 sticky top-20">
@@ -95,7 +95,7 @@ export function FeedPage() {
                     <Tabs
                         value={activeTab}
                         onValueChange={(v) => setActiveTab(v as FeedTab)}
-                        className="mb-4"
+                        className="mb-4 hidden sm:block"
                     >
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="forYou">For You</TabsTrigger>
@@ -105,8 +105,27 @@ export function FeedPage() {
                         </TabsList>
                     </Tabs>
 
+                    {/* Mobile Tabs (Simple) */}
+                    <div className="flex sm:hidden border-b mb-2 items-center justify-center sticky top-0 bg-background/95 backdrop-blur z-30">
+                        <div className="w-full grid grid-cols-2">
+                            <button
+                                onClick={() => setActiveTab('forYou')}
+                                className={cn("py-3 font-medium text-sm text-center border-b-2 transition-colors", activeTab === 'forYou' ? "border-primary text-foreground" : "border-transparent text-muted-foreground")}
+                            >
+                                For You
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('following')}
+                                disabled={!isAuthenticated}
+                                className={cn("py-3 font-medium text-sm text-center border-b-2 transition-colors", activeTab === 'following' ? "border-primary text-foreground" : "border-transparent text-muted-foreground")}
+                            >
+                                Following
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Sort Pills */}
-                    <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+                    <div className="flex items-center gap-2 mb-2 sm:mb-6 overflow-x-auto pb-2 px-3 sm:px-0">
                         {sortOptions.map((option) => (
                             <Button
                                 key={option.value}
@@ -124,7 +143,7 @@ export function FeedPage() {
                     </div>
 
                     {/* Posts List */}
-                    <div className="space-y-4">
+                    <div className="space-y-0 sm:space-y-4">
                         {isLoading ? (
                             Array.from({ length: 3 }).map((_, i) => (
                                 <PostCardSkeleton key={i} />

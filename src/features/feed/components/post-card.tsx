@@ -137,8 +137,8 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
     };
 
     return (
-        <Card className="overflow-hidden hover:bg-accent/50 transition-colors py-0 gap-0">
-            <CardHeader className={cn(isTimeline ? "p-3 pb-0" : "p-5 pb-0")}>
+        <Card className="overflow-hidden bg-background rounded-none sm:rounded-xl border-x-0 sm:border border-t-0 sm:border-t border-b border-border/50 sm:border-b-auto py-0 gap-0 shadow-none sm:shadow-sm">
+            <CardHeader className={cn(isTimeline ? "p-3 pb-0" : "p-3 sm:p-5 pb-0")}>
                 <div className="flex items-start justify-between gap-1.5">
                     {/* Author and Meta */}
                     <div className="flex items-center gap-2">
@@ -228,7 +228,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                 </div>
             </CardHeader>
 
-            <CardContent className={cn(isTimeline ? "p-3 pt-3 pb-1" : "p-5 pt-4 pb-3")}>
+            <CardContent className={cn(isTimeline ? "p-3 pt-3 pb-1" : "p-3 sm:p-5 pt-2 sm:pt-0 pb-3")}>
                 {/* Title - clickable to expand/collapse ONLY in timeline */}
                 <div
                     className={cn("flex flex-col gap-1 group", isTimeline && "cursor-pointer")}
@@ -466,8 +466,8 @@ function PostContent({ caption, format }: { caption: string; format?: string }) 
 
     useEffect(() => {
         if (contentRef.current) {
-            // Check if content height > 80px (approx 3 lines)
-            if (contentRef.current.scrollHeight > 80) {
+            // Check if content height > 120px (approx 5-6 lines)
+            if (contentRef.current.scrollHeight > 120) {
                 setShowButton(true);
             }
         }
@@ -479,7 +479,7 @@ function PostContent({ caption, format }: { caption: string; format?: string }) 
                 ref={contentRef}
                 className={cn(
                     "text-sm text-foreground/90 transition-all duration-300 ease-in-out relative overflow-hidden",
-                    !isExpanded && showButton ? "max-h-[4.5em]" : "max-h-none"
+                    !isExpanded && showButton ? "max-h-[6em]" : "max-h-none"
                 )}
             >
                 {isTiptap ? (
@@ -488,21 +488,18 @@ function PostContent({ caption, format }: { caption: string; format?: string }) 
                     <p className="whitespace-pre-wrap">{extractPlainText(caption)}</p>
                 )}
 
-                {/* Fade effect when collapsed */}
-                {!isExpanded && showButton && (
-                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none" />
-                )}
+                {/* Gradient removed as per user request */}
             </div>
 
             {showButton && (
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                    className="mt-2 text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
                 >
                     {isExpanded ? (
-                        <>See less <ChevronUp className="w-3 h-3" /></>
+                        <>Show less <ChevronUp className="w-3 h-3" /></>
                     ) : (
-                        <>See more <ChevronDown className="w-3 h-3" /></>
+                        <>Show more <ChevronDown className="w-3 h-3" /></>
                     )}
                 </button>
             )}
