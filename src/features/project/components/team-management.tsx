@@ -306,9 +306,12 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
             <div className="grid gap-4">
                 {teamMembers.map((member: any) => (
                     <Card key={member.user._id} className="overflow-hidden">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-10 w-10 border">
+                        <CardContent className="p-0 flex items-center justify-between">
+                            <a
+                                href={`/${member.user.username}`}
+                                className="flex items-center gap-4 flex-1 p-3 hover:bg-muted/50 transition-colors"
+                            >
+                                <Avatar className="h-10 w-10 border text-blue-500">
                                     <AvatarImage src={member.user.avatar} />
                                     <AvatarFallback>
                                         <User className="h-5 w-5" />
@@ -329,31 +332,33 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
                                     </div>
                                     <p className="text-sm text-muted-foreground">@{member.user.username}</p>
                                 </div>
-                            </div>
+                            </a>
 
                             {isOwner && member.role !== 'owner' && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger className={buttonVariants({ variant: "ghost", size: "icon" })} >
-                                        <X className="h-4 w-4" />
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Remove Partner</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Are you sure you want to remove <b>@{member.user.username}</b> from the team? They will lose access immediately.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                onClick={() => onRemove(member.user._id)}
-                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                            >
-                                                Remove
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
+                                <div className="pr-3">
+                                    <AlertDialog>
+                                        <AlertDialogTrigger className={buttonVariants({ variant: "ghost", size: "icon" })} onClick={(e) => e.stopPropagation()}>
+                                            <X className="h-4 w-4" />
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Remove Partner</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Are you sure you want to remove <b>@{member.user.username}</b> from the team? They will lose access immediately.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={() => onRemove(member.user._id)}
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                >
+                                                    Remove
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
                             )}
                         </CardContent>
                     </Card>

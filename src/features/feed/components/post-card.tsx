@@ -158,7 +158,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                                 >
                                     {postUser.name}
                                 </a>
-                                <span className={cn("text-muted-foreground", isTimeline ? "text-sm" : "text-sm")}>
+                                <span className={cn("text-muted-foreground hidden sm:inline", isTimeline ? "text-sm" : "text-sm")}>
                                     @{postUser.username}
                                 </span>
                             </div>
@@ -268,7 +268,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
 
                     {/* Preview in collapsed state (Timeline only) */}
                     {isTimeline && isCollapsed && post.caption && (
-                        <p className="text-sm text-muted-foreground line-clamp-1 pr-8">
+                        <p className="text-sm text-muted-foreground line-clamp-2 pr-8">
                             {extractPlainText(post.caption)}
                         </p>
                     )}

@@ -45,7 +45,7 @@ export function PostPage() {
 
     return (
         <div className="min-h-screen bg-background pb-20 lg:pb-0">
-            <div className="w-full max-w-3xl mx-auto px-4 py-6">
+            <div className="w-full max-w-3xl mx-auto px-0 sm:px-4 py-6">
                 {/* Main Content */}
                 <main className="space-y-6">
                     <Button variant="ghost" onClick={() => window.history.back()} className="mb-2 pl-0 hover:pl-2 transition-all">

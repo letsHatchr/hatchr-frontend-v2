@@ -113,7 +113,7 @@ export function ProjectPage() {
                 <main className="flex-1 min-w-0">
                     {/* Cover Image */}
                     {project.coverImage && (
-                        <div className="relative h-48 mb-6 rounded-lg overflow-hidden">
+                        <div className="relative h-48 mb-6 w-full overflow-hidden">
                             <img
                                 src={project.coverImage}
                                 alt={project.title}

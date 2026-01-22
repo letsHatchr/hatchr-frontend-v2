@@ -71,7 +71,7 @@ export function MediaCarousel({ media, className }: MediaCarouselProps) {
         <div className={cn('relative group w-full overflow-hidden rounded-lg bg-neutral-900 border border-border/50', className)}>
             {/* Fixed height container with touch handlers */}
             <div
-                className="relative w-full h-[400px] flex items-center justify-center touch-pan-y"
+                className="relative w-full h-[250px] sm:h-[400px] flex items-center justify-center touch-pan-y"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
