@@ -137,7 +137,7 @@ export function SettingsProfilePage() {
     }
 
     return (
-        <div className="container mx-auto max-w-4xl py-10 px-4">
+        <div className="container mx-auto max-w-4xl py-10 px-4 pb-24 lg:pb-10">
             <div className="mb-6 flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => navigate({ to: `/${user.username}` })}>
                     <ArrowLeft className="h-4 w-4" />

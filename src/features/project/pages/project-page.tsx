@@ -93,8 +93,16 @@ export function ProjectPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 pb-24 lg:pb-8 max-w-7xl">
-            {/* Cover Image */}
-
+            {/* Cover Image - Mobile: Top of page */}
+            {project.coverImage && (
+                <div className="lg:hidden relative h-40 -mx-4 -mt-8 mb-6 w-[calc(100%+2rem)] overflow-hidden">
+                    <img
+                        src={project.coverImage}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            )}
 
             {/* Layout: Sidebar + Main Content */}
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
@@ -111,9 +119,9 @@ export function ProjectPage() {
 
                 {/* Main Content */}
                 <main className="flex-1 min-w-0">
-                    {/* Cover Image */}
+                    {/* Cover Image - Desktop: In main content area */}
                     {project.coverImage && (
-                        <div className="relative h-48 mb-6 w-full overflow-hidden">
+                        <div className="hidden lg:block relative h-48 mb-6 w-full overflow-hidden">
                             <img
                                 src={project.coverImage}
                                 alt={project.title}

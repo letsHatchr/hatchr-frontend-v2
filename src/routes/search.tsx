@@ -1,12 +1,26 @@
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate, useSearch, Link } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
-import { Loader2, User, FileText, MessageSquare, Search } from 'lucide-react';
+import { Loader2, User, FileText, MessageSquare, Search, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
+
+// Simple debounce hook
+function useDebounceValue<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+    return debouncedValue;
+}
 
 // Utility to extract plain text from Tiptap JSON content
 function extractTextFromTiptap(content: any): string {
@@ -67,6 +81,7 @@ interface SearchResult {
         type: string;
         createdAt: string;
         project: {
+            _id?: string;
             title: string;
             slug: string;
         };
@@ -86,6 +101,12 @@ export function SearchPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState(q || '');
 
+    // Live search state
+    const [liveResults, setLiveResults] = useState<SearchResult | null>(null);
+    const [isLiveSearching, setIsLiveSearching] = useState(false);
+    const debouncedQuery = useDebounceValue(searchQuery, 300);
+
+    // Fetch full results when q param changes
     useEffect(() => {
         const fetchResults = async () => {
             if (!q) return;
@@ -119,12 +140,52 @@ export function SearchPage() {
         fetchResults();
     }, [q]);
 
+    // Live search as user types (only when no q param)
+    useEffect(() => {
+        const fetchLiveResults = async () => {
+            if (q || !debouncedQuery.trim()) {
+                setLiveResults(null);
+                return;
+            }
+
+            setIsLiveSearching(true);
+            try {
+                let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+                if (apiUrl.endsWith('/api')) {
+                    apiUrl = apiUrl.slice(0, -4);
+                }
+
+                const response = await fetch(`${apiUrl}/api/search?q=${encodeURIComponent(debouncedQuery)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setLiveResults(data);
+                }
+            } catch (error) {
+                console.error('Live search failed:', error);
+            } finally {
+                setIsLiveSearching(false);
+            }
+        };
+        fetchLiveResults();
+    }, [debouncedQuery, q]);
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
             navigate({ to: '/search', search: { q: searchQuery.trim() } });
         }
     };
+
+    const handleClear = () => {
+        setSearchQuery('');
+        setLiveResults(null);
+    };
+
+    const hasLiveResults = liveResults && (
+        (liveResults.users?.length ?? 0) > 0 ||
+        (liveResults.projects?.length ?? 0) > 0 ||
+        (liveResults.posts?.length ?? 0) > 0
+    );
 
     if (isLoading) {
         return (
@@ -138,28 +199,134 @@ export function SearchPage() {
         return (
             <div className="container mx-auto py-8 px-4 pb-24 lg:pb-8">
                 <h1 className="text-2xl font-bold text-center">Search Hatchr</h1>
-                <p className="text-muted-foreground mt-2 text-center">Enter a query to search for projects, users, and posts.</p>
+                <p className="text-muted-foreground mt-2 text-center">Find projects, users, and posts.</p>
 
-                {/* Mobile search input */}
-                <form onSubmit={handleSearch} className="mt-6 max-w-md mx-auto">
+                {/* Mobile search input with live results */}
+                <form onSubmit={handleSearch} className="mt-6 max-w-md mx-auto relative">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search projects, users, posts..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-20"
+                            className="pl-10 pr-10"
                             autoFocus
                         />
-                        <Button
-                            type="submit"
-                            size="sm"
-                            className="absolute right-1 top-1/2 -translate-y-1/2"
-                            disabled={!searchQuery.trim()}
-                        >
-                            Search
-                        </Button>
+                        {isLiveSearching ? (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : searchQuery && (
+                            <button
+                                type="button"
+                                onClick={handleClear}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
+
+                    {/* Live Results Dropdown */}
+                    {hasLiveResults && liveResults && (
+                        <div className="absolute top-full mt-2 w-full rounded-md border bg-popover text-popover-foreground shadow-lg z-50 overflow-hidden">
+                            <div className="max-h-[60vh] overflow-y-auto py-2">
+                                {/* Users */}
+                                {liveResults.users && liveResults.users.length > 0 && (
+                                    <div className="mb-2">
+                                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Users
+                                        </div>
+                                        {liveResults.users.slice(0, 3).map((user) => (
+                                            <Link
+                                                key={user._id}
+                                                to="/$username"
+                                                params={{ username: user.username }}
+                                                className="flex items-center gap-3 px-4 py-2 hover:bg-muted/50 transition-colors"
+                                            >
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarImage src={user.avatar} />
+                                                    <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                                                </Avatar>
+                                                <div className="overflow-hidden">
+                                                    <p className="text-sm font-medium truncate">{user.name}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Projects */}
+                                {liveResults.projects && liveResults.projects.length > 0 && (
+                                    <div className="mb-2">
+                                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-t pt-2">
+                                            Projects
+                                        </div>
+                                        {liveResults.projects.slice(0, 3).map((project) => (
+                                            <Link
+                                                key={project._id}
+                                                to="/project/$slug"
+                                                params={{ slug: project.slug || project._id }}
+                                                search={{ tab: 'timeline' }}
+                                                className="flex items-start gap-3 px-4 py-2 hover:bg-muted/50 transition-colors"
+                                            >
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-muted">
+                                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                                </div>
+                                                <div className="overflow-hidden">
+                                                    <p className="text-sm font-medium truncate">{project.title}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">by {project.user?.username}</p>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Posts */}
+                                {liveResults.posts && liveResults.posts.length > 0 && (
+                                    <div className="mb-2">
+                                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-t pt-2">
+                                            Posts
+                                        </div>
+                                        {liveResults.posts.slice(0, 3).map((post) => (
+                                            <Link
+                                                key={post._id}
+                                                to="/project/$slug"
+                                                params={{ slug: post.project?.slug || post.project?._id || post._id }}
+                                                search={{ tab: 'timeline' }}
+                                                className="flex items-start gap-3 px-4 py-2 hover:bg-muted/50 transition-colors"
+                                            >
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-muted">
+                                                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                                </div>
+                                                <div className="overflow-hidden">
+                                                    <p className="text-sm font-medium truncate">{post.title}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">{extractTextFromTiptap(post.caption)}</p>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="p-2 border-t">
+                                    <button
+                                        type="submit"
+                                        className="w-full text-center text-xs text-primary hover:underline py-1"
+                                    >
+                                        View all results for "{searchQuery}"
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* No results message */}
+                    {searchQuery && !isLiveSearching && !hasLiveResults && debouncedQuery && (
+                        <div className="absolute top-full mt-2 w-full rounded-md border bg-popover p-4 text-center text-sm text-muted-foreground shadow-lg z-50">
+                            No results found for "{searchQuery}"
+                        </div>
+                    )}
                 </form>
             </div>
         );

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from '@tanstack/react-router';
-import { Plus, LogOut, User, Settings, Eye, Bell } from 'lucide-react';
+import { Plus, LogOut, User, Settings, Eye, Bell, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { UserAvatar } from '@/components/user-avatar';
@@ -85,12 +85,17 @@ export function Navbar() {
                         </Link>
                         <DropdownMenu>
                             <DropdownMenuTrigger className="focus:outline-none ml-1">
-                                <UserAvatar
-                                    src={user.avatar}
-                                    name={user.name}
-                                    username={user.username}
-                                    size="md"
-                                />
+                                <DropdownMenuTrigger className="focus:outline-none ml-1">
+                                    <Menu className="h-6 w-6 lg:hidden" />
+                                    <div className="hidden lg:block">
+                                        <UserAvatar
+                                            src={user.avatar}
+                                            name={user.name}
+                                            username={user.username}
+                                            size="md"
+                                        />
+                                    </div>
+                                </DropdownMenuTrigger>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
                                 <DropdownMenuGroup>

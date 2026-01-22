@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { UserAvatar } from '@/components/user-avatar';
-import { Eye, FileText, Image, Film, FileCode, Archive, ChevronRight, Download, Loader2 } from 'lucide-react';
+import { Eye, FileText, Image, Film, FileCode, Archive, ChevronRight, ChevronDown, Download, Loader2 } from 'lucide-react';
 import type { Project, ProjectFile } from '../types';
 import { ProjectSettingsMenu } from './project-settings-menu';
 import { FilePreviewModal } from '@/components/file-preview-modal';
@@ -52,7 +52,14 @@ export function ProjectSidebar({
     const filesUrl = `${projectUrl}/files`;
 
     const [previewFile, setPreviewFile] = useState<any>(null);
+    const [isFilesExpanded, setIsFilesExpanded] = useState(false);
     const downloadMutation = useDownloadFile();
+
+    // Check if mobile on mount
+    useEffect(() => {
+        const isMobile = window.innerWidth < 1024;
+        setIsFilesExpanded(!isMobile); // Expanded on desktop, collapsed on mobile
+    }, []);
 
     // Get up to 4 most recent files
     const recentFiles = (project.files as ProjectFile[] || []).slice(0, 4);
@@ -70,7 +77,7 @@ export function ProjectSidebar({
     };
 
     return (
-        <aside className="w-full space-y-5">
+        <aside className="w-full space-y-3 lg:space-y-5">
             {/* Project Title */}
             <div>
                 <h1 className="text-2xl font-bold">{project.title}</h1>
@@ -157,73 +164,84 @@ export function ProjectSidebar({
 
             {/* Project Files Preview Card - Normal card with primary header */}
             <Card className="overflow-hidden">
-                {/* Header bar - changed to gray per user request */}
-                <div className="p-3 bg-muted/40 border-b">
+                {/* Header bar - clickable to toggle on mobile */}
+                <div
+                    className="p-3 bg-muted/40 border-b cursor-pointer lg:cursor-default hover:bg-muted/60 lg:hover:bg-muted/40 transition-colors"
+                    onClick={() => setIsFilesExpanded(!isFilesExpanded)}
+                >
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4 text-primary" />
                             <span className="font-semibold text-sm text-primary">Project Files</span>
                         </div>
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary hover:bg-primary/20 border-0 font-bold">
-                            {totalFiles}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary hover:bg-primary/20 border-0 font-bold">
+                                {totalFiles}
+                            </Badge>
+                            <ChevronDown className={`h-4 w-4 text-primary transition-transform lg:hidden ${isFilesExpanded ? 'rotate-180' : ''}`} />
+                        </div>
                     </div>
                 </div>
 
-                {totalFiles > 0 ? (
-                    <div className="divide-y divide-border">
-                        {recentFiles.map((file) => {
-                            const isDownloading = downloadMutation.isPending && downloadMutation.variables === file._id;
-                            return (
-                                <div
-                                    key={file._id}
-                                    className="group flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors cursor-pointer"
-                                    onClick={() => setPreviewFile(file)}
-                                >
-                                    {getFileIcon(file.fileType)}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm truncate group-hover:text-primary transition-colors">{file.originalFileName}</p>
-                                        <p className="text-xs text-muted-foreground">{formatFileSize(file.fileSize)}</p>
-                                    </div>
+                {/* Collapsible file list */}
+                {isFilesExpanded && (
+                    <>
+                        {totalFiles > 0 ? (
+                            <div className="divide-y divide-border">
+                                {recentFiles.map((file) => {
+                                    const isDownloading = downloadMutation.isPending && downloadMutation.variables === file._id;
+                                    return (
+                                        <div
+                                            key={file._id}
+                                            className="group flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors cursor-pointer"
+                                            onClick={() => setPreviewFile(file)}
+                                        >
+                                            {getFileIcon(file.fileType)}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm truncate group-hover:text-primary transition-colors">{file.originalFileName}</p>
+                                                <p className="text-xs text-muted-foreground">{formatFileSize(file.fileSize)}</p>
+                                            </div>
 
-                                    {/* Action Buttons - Visible on hover */}
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setPreviewFile(file);
-                                            }}
-                                            title="View"
-                                        >
-                                            <Eye className="h-3.5 w-3.5" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                                            onClick={(e) => handleDownload(e, file._id, file.originalFileName)}
-                                            disabled={isDownloading}
-                                            title="Download"
-                                        >
-                                            {isDownloading ? (
-                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                            ) : (
-                                                <Download className="h-3.5 w-3.5" />
-                                            )}
-                                        </Button>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-                        <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                        <p>No files uploaded yet</p>
-                    </div>
+                                            {/* Action Buttons - Visible on hover */}
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setPreviewFile(file);
+                                                    }}
+                                                    title="View"
+                                                >
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                    onClick={(e) => handleDownload(e, file._id, file.originalFileName)}
+                                                    disabled={isDownloading}
+                                                    title="Download"
+                                                >
+                                                    {isDownloading ? (
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                    ) : (
+                                                        <Download className="h-3.5 w-3.5" />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                                <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                                <p>No files uploaded yet</p>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {/* See All Files link */}

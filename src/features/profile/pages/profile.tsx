@@ -110,7 +110,7 @@ export function ProfilePage() {
     const followLoading = followMutation.isPending || unfollowMutation.isPending;
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background pb-24 lg:pb-0">
             {/* Main Content */}
             <div className="max-w-6xl mx-auto px-4 py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-6">

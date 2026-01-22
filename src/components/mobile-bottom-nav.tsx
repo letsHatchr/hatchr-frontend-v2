@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouterState } from '@tanstack/react-router';
-import { Home, Search, PlusSquare, Trophy, User } from 'lucide-react';
+import { Home, Search, PlusSquare, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store';
+import { UserAvatar } from '@/components/user-avatar';
 
 const navItems = [
     { href: '/feed', icon: Home, label: 'Home' },
@@ -69,7 +70,13 @@ export function MobileBottomNav() {
                         currentPath === `/${user?.username}` ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                     )}
                 >
-                    <User className="h-5 w-5" />
+                    <UserAvatar
+                        src={user.avatar}
+                        name={user.name}
+                        username={user.username}
+                        className="h-6 w-6 text-foreground"
+                        fallbackClassName="text-[10px]"
+                    />
                     <span className="text-xs">Profile</span>
                 </a>
             </div>
