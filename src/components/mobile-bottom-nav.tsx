@@ -71,11 +71,10 @@ export function MobileBottomNav() {
                     )}
                 >
                     <UserAvatar
-                        src={user.avatar}
-                        name={user.name}
-                        username={user.username}
+                        src={user?.avatar}
+                        name={user?.name || ''}
+                        username={user?.username || ''}
                         className="h-6 w-6 text-foreground"
-                        fallbackClassName="text-[10px]"
                     />
                     <span className="text-xs">Profile</span>
                 </a>
