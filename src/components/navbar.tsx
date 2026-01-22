@@ -85,17 +85,15 @@ export function Navbar() {
                         </Link>
                         <DropdownMenu>
                             <DropdownMenuTrigger className="focus:outline-none ml-1">
-                                <DropdownMenuTrigger className="focus:outline-none ml-1">
-                                    <Menu className="h-6 w-6 lg:hidden" />
-                                    <div className="hidden lg:block">
-                                        <UserAvatar
-                                            src={user.avatar}
-                                            name={user.name}
-                                            username={user.username}
-                                            size="md"
-                                        />
-                                    </div>
-                                </DropdownMenuTrigger>
+                                <Menu className="h-6 w-6 lg:hidden" />
+                                <div className="hidden lg:block">
+                                    <UserAvatar
+                                        src={user.avatar}
+                                        name={user.name}
+                                        username={user.username}
+                                        size="md"
+                                    />
+                                </div>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
                                 <DropdownMenuGroup>
