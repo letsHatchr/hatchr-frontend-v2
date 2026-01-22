@@ -1,5 +1,7 @@
+'use client';
+
 import { cn } from '@/lib/utils';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 
 interface LogoProps {
     size?: 'sm' | 'md' | 'lg';
@@ -37,6 +39,21 @@ export function Logo({
     linkTo = '/'
 }: LogoProps) {
     const config = sizeConfig[size];
+    const routerState = useRouterState();
+    const currentPath = routerState.location.pathname;
+
+    // Check if we're on home/feed page
+    const isOnHomePage = currentPath === '/' || currentPath === '/feed';
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (isOnHomePage) {
+            e.preventDefault();
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Trigger a page refresh to get new content
+            window.location.reload();
+        }
+    };
 
     const LogoContent = (
         <div className={cn('flex items-center', config.gap, className)}>
@@ -71,7 +88,11 @@ export function Logo({
 
     if (linkTo) {
         return (
-            <Link to={linkTo} className="hover:opacity-80 transition-opacity">
+            <Link
+                to={linkTo}
+                className="hover:opacity-80 transition-opacity"
+                onClick={handleClick}
+            >
                 {LogoContent}
             </Link>
         );

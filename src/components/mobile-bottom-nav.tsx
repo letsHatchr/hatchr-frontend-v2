@@ -32,6 +32,15 @@ export function MobileBottomNav() {
                     const isActive = currentPath === item.href ||
                         (item.href === '/feed' && (currentPath === '/' || currentPath === '/feed'));
 
+                    // Handle Home click - scroll to top and refresh if already on feed
+                    const handleClick = (e: React.MouseEvent) => {
+                        if (item.href === '/feed' && isActive) {
+                            e.preventDefault();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.location.reload();
+                        }
+                    };
+
                     if (item.isAction) {
                         // Center action button (Create Post)
                         return (
@@ -51,6 +60,7 @@ export function MobileBottomNav() {
                         <a
                             key={item.href}
                             href={item.href}
+                            onClick={handleClick}
                             className={cn(
                                 'flex flex-col items-center justify-center gap-1 px-3 py-2 transition-colors',
                                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
