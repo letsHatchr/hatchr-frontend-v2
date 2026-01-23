@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { Loader2, UserPlus, X, Shield, LogOut, User, Mail } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
     Card,
     CardContent,
@@ -98,11 +96,7 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
         }
     };
 
-    const { register, handleSubmit, reset } = useForm({
-        defaultValues: {
-            usernameOrEmail: '',
-        },
-    });
+
 
     const onInvite = async (values: { usernameOrEmail: string }) => {
         if (!values.usernameOrEmail) {
@@ -116,7 +110,6 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
                 projectSlug: project.slug,
             });
             toast.success('Invitation sent successfully');
-            reset();
             setInviteOpen(false);
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to send invitation');
@@ -391,10 +384,10 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
                                                 </Avatar>
                                                 <div>
                                                     <div className="font-medium">
-                                                        {invite.user?.name || invite.user?.username || invite.email || 'User'}
+                                                        {invite.user?.name || invite.user?.username || invite.name || invite.username || invite.email || 'User'}
                                                     </div>
                                                     <div className="text-sm text-muted-foreground flex items-center gap-2">
-                                                        {invite.user?.username && <span>@{invite.user.username}</span>}
+                                                        {(invite.user?.username || invite.username) && <span>@{invite.user?.username || invite.username}</span>}
                                                         <span>•</span>
                                                         <span>Invited {new Date(invite.sentAt).toLocaleDateString()}</span>
                                                     </div>
