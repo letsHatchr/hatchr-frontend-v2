@@ -42,6 +42,11 @@ export interface Post {
     user: PostAuthor;
     upvotes: string[];
     downvotes: string[];
+    // Vote state computed by backend
+    hasUpvoted?: boolean;
+    hasDownvoted?: boolean;
+    upvoteCount?: number;
+    downvoteCount?: number;
     comments: PostComment[];
     files?: {
         _id: string;
