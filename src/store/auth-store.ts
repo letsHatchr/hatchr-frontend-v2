@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { EmailNotificationPreferences } from '../features/profile/types';
 
 interface User {
   _id: string;
@@ -12,6 +13,7 @@ interface User {
   followers: string[];
   following: string[];
   isEmailVerified: boolean;
+  emailNotifications?: EmailNotificationPreferences;
 }
 
 interface AuthState {

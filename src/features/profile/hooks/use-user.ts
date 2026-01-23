@@ -192,3 +192,27 @@ export function useUploadBanner() {
         },
     });
 }
+// Update email notification preferences
+export function useUpdateEmailPreferences() {
+    const queryClient = useQueryClient();
+    const setUser = useAuthStore((state) => state.setUser);
+    const user = useAuthStore((state) => state.user);
+
+    return useMutation({
+        mutationFn: async (preferences: Partial<any>) => {
+            const response = await api.patch('/users/email-preferences', preferences);
+            return response.data;
+        },
+        onSuccess: (data) => {
+            if (user && data.emailNotifications) {
+                // Update local user state with new preferences
+                setUser({
+                    ...user,
+                    emailNotifications: data.emailNotifications
+                });
+            }
+            // Invalidate queries to ensure sync
+            queryClient.invalidateQueries({ queryKey: userKeys.profile(user?.username || '') });
+        },
+    });
+}

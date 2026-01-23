@@ -15,6 +15,7 @@ export interface User {
     followedProjects?: Project[];
     socialLinks?: SocialLinks;
     profileTheme?: ProfileTheme;
+    emailNotifications?: EmailNotificationPreferences;
     // New fields from wireframe
     college?: string;
     school?: string;
@@ -53,6 +54,18 @@ export interface ThemeColors {
     accent: string;
     light: string;
     dark: string;
+}
+
+export interface EmailNotificationPreferences {
+    mentions: boolean;
+    watchedProjectPosts: boolean;
+    collaborationInvites: boolean;
+    inviteResponses: boolean;
+    pointsMilestones: boolean;
+    trendingProjects: boolean;
+    newFollowers: boolean;
+    weeklySummary: boolean;
+    monthlyStats: boolean;
 }
 
 export interface Project {
