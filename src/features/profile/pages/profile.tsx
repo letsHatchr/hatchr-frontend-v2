@@ -18,13 +18,7 @@ import {
     useUnfollowUser,
 } from '../hooks/use-user';
 import { useReorderProjects } from '../hooks/use-reorder-projects';
-
-interface Project {
-    _id: string;
-    title: string;
-    isArchived?: boolean;
-    [key: string]: unknown;
-}
+import type { Project } from '../types';
 
 export function ProfilePage() {
     const { username } = useParams({ from: '/$username' });
