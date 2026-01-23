@@ -30,6 +30,22 @@ import {
     useDeclineInvitation,
     useWithdrawInvitation
 } from '../hooks/use-project';
+import { useSearchUsers } from '../hooks/use-search-users';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 
 
@@ -52,8 +68,13 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
     const withdrawMutation = useWithdrawInvitation();
 
     const [inviteOpen, setInviteOpen] = useState(false);
+    // User search state
+    const [openCombobox, setOpenCombobox] = useState(false);
+    const [searchValue, setSearchValue] = useState("");
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const { data: searchResults, isLoading: isSearching } = useSearchUsers(searchValue);
 
-    const pendingInvite = myInvitations?.find((inv: any) =>
+    const pendingInvite = myInvitations?.find((inv: any) => // ... existing code
         (inv.project?._id === project._id) || (inv.projectDetails?._id === project._id)
     );
 
@@ -159,28 +180,112 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
                     <div className="flex gap-2">
                         {inviteOpen ? (
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
-                                <form onSubmit={handleSubmit(onInvite)} className="flex gap-2">
-                                    <Input
-                                        placeholder="Username or Email"
-                                        className="w-64"
-                                        {...register("usernameOrEmail", { required: true })}
-                                    />
-                                    <Button type="submit" size="sm" disabled={inviteMutation.isPending}>
-                                        {inviteMutation.isPending ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            'Send'
-                                        )}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setInviteOpen(false)}
+                                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                    <PopoverTrigger
+                                        role="combobox"
+                                        aria-expanded={openCombobox}
+                                        className={cn(buttonVariants({ variant: "outline" }), "w-[250px] justify-between")}
                                     >
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </form>
+                                        {selectedUser
+                                            ? selectedUser.username
+                                            : "Search user to invite..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[250px] p-0">
+                                        <Command shouldFilter={false}>
+                                            <CommandInput
+                                                placeholder="Search username..."
+                                                value={searchValue}
+                                                onValueChange={setSearchValue}
+                                            />
+                                            <CommandList>
+                                                {isSearching && (
+                                                    <div className="py-6 text-center text-sm text-muted-foreground">
+                                                        <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+                                                        Searching...
+                                                    </div>
+                                                )}
+                                                {!isSearching && searchResults?.length === 0 && searchValue.length >= 2 && (
+                                                    <CommandEmpty>No user found.</CommandEmpty>
+                                                )}
+                                                {!isSearching && (!searchResults || searchResults.length === 0) && searchValue.length < 2 && (
+                                                    <div className="py-6 text-center text-sm text-muted-foreground">
+                                                        Type at least 2 characters
+                                                    </div>
+                                                )}
+                                                <CommandGroup>
+                                                    {searchResults?.map((user) => (
+                                                        <CommandItem
+                                                            key={user._id}
+                                                            value={user.username}
+                                                            onSelect={() => {
+                                                                setSelectedUser(user);
+                                                                setOpenCombobox(false);
+                                                                setSearchValue(""); // clear search optionally
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center gap-2 w-full">
+                                                                <Avatar className="h-6 w-6">
+                                                                    <AvatarImage src={user.avatar} />
+                                                                    <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                                                </Avatar>
+                                                                <div className="flex flex-col overflow-hidden">
+                                                                    <span className="truncate font-medium">{user.name}</span>
+                                                                    <span className="truncate text-xs text-muted-foreground">@{user.username}</span>
+                                                                </div>
+                                                                <Check
+                                                                    className={cn(
+                                                                        "ml-auto h-4 w-4",
+                                                                        selectedUser?._id === user._id ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+
+                                <Button
+                                    onClick={() => {
+                                        if (selectedUser) {
+                                            onInvite({ usernameOrEmail: selectedUser.username });
+                                            setSelectedUser(null);
+                                        } else if (searchValue.includes('@')) {
+                                            // Fallback for direct email entry if search logic allows or via different input
+                                            // For now simpler: must select user. 
+                                            // Or we can add an input for email if no user selected? 
+                                            // The current task implementation focuses on user search.
+                                            // If user types email in search and no result, currently can't invite.
+                                            // Let's stick to user search as requested for "sure I am inviting right person".
+                                            toast.error("Please select a user from the list");
+                                        } else {
+                                            toast.error("Please select a user");
+                                        }
+                                    }}
+                                    size="sm"
+                                    disabled={inviteMutation.isPending || !selectedUser}
+                                >
+                                    {inviteMutation.isPending ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        'Invite'
+                                    )}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setInviteOpen(false);
+                                        setSelectedUser(null);
+                                        setSearchValue("");
+                                    }}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
                             </div>
                         ) : (
                             <Button onClick={() => setInviteOpen(true)} size="sm">
@@ -259,22 +364,40 @@ export function TeamManagement({ project, isOwner, currentUser }: TeamManagement
                                 .filter((invite: any) => {
                                     // Filter out invitations for users who are already partners
                                     // This checks both ID (if available) and email logic if needed
-                                    const isAlreadyPartner = project.partners.some((p: any) =>
-                                        (invite.userId && p.user._id === invite.userId) ||
-                                        (invite.email && p.user.email === invite.email)
-                                    );
-                                    return !isAlreadyPartner;
+                                    const isAlreadyPartner = project.partners.some((p: any) => {
+                                        // Handle both string ID and populated object
+                                        const inviteUserId = invite.userId && typeof invite.userId === 'object'
+                                            ? invite.userId._id
+                                            : invite.userId;
+
+                                        return (inviteUserId && p.user._id === inviteUserId) ||
+                                            (invite.email && p.user.email === invite.email);
+                                    });
+                                    // Fix: Filter out withdrawn/declined invitations
+                                    // Assuming 'status' field exists. If not, this might need adjustment based on API response.
+                                    const isPending = invite.status ? invite.status === 'pending' : true;
+                                    return !isAlreadyPartner && isPending;
                                 })
                                 .map((invite: any) => (
                                     <Card key={invite._id} className="overflow-hidden border-dashed">
                                         <CardContent className="p-4 flex items-center justify-between">
                                             <div className="flex items-center gap-4">
-                                                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                                                    <Mail className="h-5 w-5 text-muted-foreground" />
-                                                </div>
+                                                <Avatar className="h-10 w-10">
+                                                    {/* Try to show avatar if available (e.g. invite to existing user) */}
+                                                    <AvatarImage src={invite.user?.avatar || invite.avatar} />
+                                                    <AvatarFallback>
+                                                        <Mail className="h-5 w-5 text-muted-foreground" />
+                                                    </AvatarFallback>
+                                                </Avatar>
                                                 <div>
-                                                    <div className="font-medium">{invite.email || 'User'}</div>
-                                                    <p className="text-sm text-muted-foreground">Invited {new Date(invite.sentAt).toLocaleDateString()}</p>
+                                                    <div className="font-medium">
+                                                        {invite.user?.name || invite.user?.username || invite.email || 'User'}
+                                                    </div>
+                                                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                                        {invite.user?.username && <span>@{invite.user.username}</span>}
+                                                        <span>•</span>
+                                                        <span>Invited {new Date(invite.sentAt).toLocaleDateString()}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <Badge variant="outline">Pending</Badge>
