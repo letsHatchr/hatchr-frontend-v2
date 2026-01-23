@@ -1,21 +1,153 @@
-import { useEffect } from 'react';
+'use client';
+
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { useNotifications, useMarkAllRead, useMarkRead } from '../hooks/use-notifications';
-import { UserAvatar } from '@/components/user-avatar';
+import { useNotifications, useMarkAllRead, useMarkRead, useUnreadCount } from '../hooks/use-notifications';
+import { NotificationFilters, type NotificationFilter } from '../components/notification-filters';
+import { NotificationItem } from '../components/notification-item';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Loader2, Check, Bell, Heart, MessageCircle, UserPlus, AtSign } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { Link } from '@tanstack/react-router';
-import type { Notification } from '../types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2, Check, Bell, Inbox, PartyPopper, BellOff } from 'lucide-react';
 import { useAcceptInvitation, useDeclineInvitation, useMyInvitations } from '@/features/project/hooks/use-project';
 import { toast } from 'sonner';
+import type { Notification } from '../types';
+import { cn } from '@/lib/utils';
 
-import { useState } from 'react';
+// Date grouping helpers
+function getDateGroup(date: Date): string {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const notifDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    if (notifDate >= today) return 'Today';
+    if (notifDate >= yesterday) return 'Yesterday';
+    if (notifDate >= weekAgo) return 'This Week';
+    return 'Earlier';
+}
+
+function groupNotificationsByDate(notifications: Notification[]): Record<string, Notification[]> {
+    const groups: Record<string, Notification[]> = {};
+    const order = ['Today', 'Yesterday', 'This Week', 'Earlier'];
+
+    // Initialize groups in order
+    order.forEach(key => { groups[key] = []; });
+
+    notifications.forEach(notification => {
+        const group = getDateGroup(new Date(notification.createdAt));
+        groups[group].push(notification);
+    });
+
+    // Remove empty groups
+    order.forEach(key => {
+        if (groups[key].length === 0) delete groups[key];
+    });
+
+    return groups;
+}
+
+// Filter notifications client-side based on type
+function filterNotifications(notifications: Notification[], filter: NotificationFilter): Notification[] {
+    switch (filter) {
+        case 'unread':
+            return notifications.filter(n => !n.isRead);
+        case 'invites':
+            return notifications.filter(n => n.type === 'PROJECT_INVITATION');
+        case 'social':
+            return notifications.filter(n =>
+                ['LIKE_POST', 'COMMENT_POST', 'NEW_FOLLOWER', 'MENTION_POST', 'MENTION_COMMENT', 'POST_COMMENT', 'POST_UPVOTE', 'COMMENT_REPLY'].includes(n.type)
+            );
+        case 'projects':
+            return notifications.filter(n =>
+                ['PROJECT_INVITATION', 'PROJECT_JOIN', 'PROJECT_LEAVE', 'INVITATION_ACCEPTED', 'INVITATION_DECLINED'].includes(n.type)
+            );
+        default:
+            return notifications;
+    }
+}
+
+// Skeleton loader for notifications
+function NotificationSkeleton() {
+    return (
+        <div className="p-4 rounded-xl">
+            <div className="flex gap-3">
+                <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16 ml-auto" />
+                    </div>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Empty state component
+function EmptyState({ filter }: { filter: NotificationFilter }) {
+    const content = useMemo(() => {
+        switch (filter) {
+            case 'unread':
+                return {
+                    icon: <PartyPopper className="h-16 w-16 text-primary/30" />,
+                    title: "You're all caught up!",
+                    description: "No unread notifications. Check back later for new updates."
+                };
+            case 'invites':
+                return {
+                    icon: <Inbox className="h-16 w-16 text-muted-foreground/30" />,
+                    title: "No project invites",
+                    description: "When someone invites you to collaborate, you'll see it here."
+                };
+            case 'social':
+                return {
+                    icon: <Bell className="h-16 w-16 text-muted-foreground/30" />,
+                    title: "No social activity yet",
+                    description: "Likes, comments, and follows will appear here."
+                };
+            case 'projects':
+                return {
+                    icon: <BellOff className="h-16 w-16 text-muted-foreground/30" />,
+                    title: "No project updates",
+                    description: "Updates about your projects will show up here."
+                };
+            default:
+                return {
+                    icon: <Bell className="h-16 w-16 text-muted-foreground/30" />,
+                    title: "No notifications yet",
+                    description: "When you get notifications, they'll show up here."
+                };
+        }
+    }, [filter]);
+
+    return (
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <div className="mb-4 animate-pulse">
+                {content.icon}
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-1">
+                {content.title}
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-xs">
+                {content.description}
+            </p>
+        </div>
+    );
+}
 
 export function NotificationsPage() {
-    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useNotifications();
+    const [activeFilter, setActiveFilter] = useState<NotificationFilter>('all');
     const [actionState, setActionState] = useState<Record<string, 'accepted' | 'declined'>>({});
+
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useNotifications();
+    const { data: unreadCount = 0 } = useUnreadCount();
     const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllRead();
     const { mutate: markRead } = useMarkRead();
 
@@ -25,11 +157,9 @@ export function NotificationsPage() {
     const declineInviteMutation = useDeclineInvitation();
     const { data: myInvitations } = useMyInvitations();
 
-    const isInvitePending = (token: string) => {
-        // Check if the invitation token exists in the myInvitations list
-        // We handle potential undefined data safely
+    const isInvitePending = useCallback((token: string) => {
         return myInvitations?.some((invite: any) => invite.token === token) ?? false;
-    };
+    }, [myInvitations]);
 
     const onAcceptInvite = async (token: string, notificationId: string, e: React.MouseEvent) => {
         e.preventDefault();
@@ -68,6 +198,7 @@ export function NotificationsPage() {
 
     const handleMarkAllRead = () => {
         markAllRead();
+        toast.success('All notifications marked as read');
     };
 
     const handleNotificationClick = (notification: Notification) => {
@@ -76,159 +207,133 @@ export function NotificationsPage() {
         }
     };
 
-    const getIcon = (type: Notification['type']) => {
-        switch (type) {
-            case 'LIKE_POST':
-                return <Heart className="h-4 w-4 text-red-500 fill-red-500" />;
-            case 'COMMENT_POST':
-            case 'MENTION_COMMENT':
-                return <MessageCircle className="h-4 w-4 text-blue-500" />;
-            case 'NEW_FOLLOWER':
-                return <UserPlus className="h-4 w-4 text-green-500" />;
-            case 'MENTION_POST':
-                return <AtSign className="h-4 w-4 text-orange-500" />;
-            case 'PROJECT_INVITATION':
-            case 'PROJECT_JOIN':
-            case 'PROJECT_LEAVE':
-                return <Bell className="h-4 w-4 text-purple-500" />;
-            default:
-                return <Bell className="h-4 w-4 text-gray-500" />;
-        }
-    };
+    // Get all notifications and apply filter
+    const allNotifications = useMemo(() =>
+        data?.pages.flatMap(page => page.notifications) ?? [],
+        [data]
+    );
 
-    const getLink = (notification: Notification): string => {
-        const { type, relatedEntity, actor } = notification;
+    const filteredNotifications = useMemo(() =>
+        filterNotifications(allNotifications, activeFilter),
+        [allNotifications, activeFilter]
+    );
 
-        switch (type) {
-            case 'LIKE_POST':
-            case 'COMMENT_POST':
-            case 'MENTION_POST':
-            case 'MENTION_COMMENT':
-                return relatedEntity?.slug ? `/post/${relatedEntity.slug}` : '#';
-            case 'NEW_FOLLOWER':
-                return `/${actor.username}`;
-            case 'PROJECT_INVITATION':
-                // Check if invite/token exists, otherwise project link
-                return '/invitations/my'; // Or project link if simplified
-            case 'PROJECT_JOIN':
-            case 'PROJECT_LEAVE':
-                // Ideally link to project if slug available, logic depends on backend data.
-                // Assuming relatedEntity for project has valid slug or ID if feasible.
-                return '#';
-            default:
-                return '#';
-        }
-    };
+    const groupedNotifications = useMemo(() =>
+        groupNotificationsByDate(filteredNotifications),
+        [filteredNotifications]
+    );
+
+    const hasUnread = allNotifications.some(n => !n.isRead);
 
     return (
-        <div className="container max-w-2xl mx-auto py-8 px-4">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Notifications</h1>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleMarkAllRead}
-                    disabled={isMarkingAll}
-                >
-                    <Check className="h-4 w-4 mr-2" />
-                    Mark all read
-                </Button>
-            </div>
-
-            {isLoading ? (
-                <div className="flex justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-            ) : data?.pages[0]?.notifications.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                    <Bell className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                    <p>No notifications yet</p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {data?.pages.map((page, i) => (
-                        <div key={i} className="space-y-4">
-                            {page.notifications.map((notification) => (
-                                <Link
-                                    key={notification._id}
-                                    to={getLink(notification)}
-                                    onClick={() => handleNotificationClick(notification)}
-                                    className="block"
-                                >
-                                    <Card className={`p-4 transition-colors hover:bg-accent/50 ${!notification.isRead ? 'bg-accent/10 border-l-4 border-l-primary' : ''}`}>
-                                        <div className="flex gap-4">
-                                            <div className="mt-1">
-                                                {getIcon(notification.type)}
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <UserAvatar
-                                                        src={notification.actor.avatar}
-                                                        name={notification.actor.name}
-                                                        username={notification.actor.username}
-                                                        size="sm"
-                                                    />
-                                                    <span className="font-semibold text-sm">{notification.actor.name}</span>
-                                                    <span className="text-xs text-muted-foreground ml-auto">
-                                                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-foreground/90">{notification.message}</p>
-
-                                                {/* Start: Accept/Decline Buttons for Project Invites */}
-                                                {/* Start: Accept/Decline Buttons for Project Invites */}
-                                                {/* Only show buttons if the invitation is still pending in our records */}
-                                                {notification.type === 'PROJECT_INVITATION' &&
-                                                    notification.metadata?.token &&
-                                                    isInvitePending(notification.metadata.token) && (
-                                                        <div className="flex gap-2 mt-2">
-                                                            <Button
-                                                                size="sm"
-                                                                variant="default"
-                                                                onClick={(e) => onAcceptInvite(notification.metadata!.token, notification._id, e)}
-                                                                disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
-                                                                className="h-7 text-xs"
-                                                            >
-                                                                Accept
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="outline"
-                                                                onClick={(e) => onDeclineInvite(notification.metadata!.token, notification._id, e)}
-                                                                disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
-                                                                className="h-7 text-xs"
-                                                            >
-                                                                Decline
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                {/* Show status if not pending but was an invitation */}
-                                                {notification.type === 'PROJECT_INVITATION' &&
-                                                    notification.metadata?.token &&
-                                                    !isInvitePending(notification.metadata.token) && (
-                                                        <div className="mt-2 text-sm text-muted-foreground italic">
-                                                            {(actionState[notification._id] === 'accepted') ? 'Accepted' :
-                                                                (actionState[notification._id] === 'declined') ? 'Declined' :
-                                                                    'Invitation no longer active'}
-                                                        </div>
-                                                    )}
-                                                {/* End: Accept/Decline Buttons */}
-                                                {/* End: Accept/Decline Buttons */}
-                                            </div>
-                                        </div>
-                                    </Card>
-                                </Link>
-                            ))}
-                        </div>
-                    ))}
-                    <div ref={ref} className="h-4" />
-                    {isFetchingNextPage && (
-                        <div className="flex justify-center py-4">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                        </div>
+        <div className="min-h-screen bg-background pb-24 lg:pb-8">
+            <div className="container max-w-2xl mx-auto py-6 px-4">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                            Stay updated with your activity
+                        </p>
+                    </div>
+                    {hasUnread && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleMarkAllRead}
+                            disabled={isMarkingAll}
+                            className="gap-2"
+                        >
+                            {isMarkingAll ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Check className="h-4 w-4" />
+                            )}
+                            Mark all read
+                        </Button>
                     )}
                 </div>
-            )}
+
+                {/* Filter Tabs */}
+                <div className="mb-6">
+                    <NotificationFilters
+                        activeFilter={activeFilter}
+                        onFilterChange={setActiveFilter}
+                        unreadCount={unreadCount}
+                    />
+                </div>
+
+                {/* Content */}
+                {isLoading ? (
+                    <div className="space-y-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <NotificationSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : filteredNotifications.length === 0 ? (
+                    <EmptyState filter={activeFilter} />
+                ) : (
+                    <div className="space-y-6">
+                        {Object.entries(groupedNotifications).map(([group, notifications]) => (
+                            <div key={group}>
+                                {/* Date Group Header */}
+                                <div className="flex items-center gap-3 mb-3">
+                                    <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                        {group}
+                                    </h2>
+                                    <div className="flex-1 h-px bg-border/50" />
+                                    <span className="text-xs text-muted-foreground/60">
+                                        {notifications.length}
+                                    </span>
+                                </div>
+
+                                {/* Notification Items */}
+                                <div className="space-y-1 bg-card/30 rounded-xl border border-border/30 overflow-hidden">
+                                    {notifications.map((notification, index) => (
+                                        <div
+                                            key={notification._id}
+                                            className={cn(
+                                                index !== notifications.length - 1 && "border-b border-border/20"
+                                            )}
+                                        >
+                                            <NotificationItem
+                                                notification={notification}
+                                                onClick={() => handleNotificationClick(notification)}
+                                                isInvitePending={
+                                                    notification.type === 'PROJECT_INVITATION' &&
+                                                    notification.metadata?.token &&
+                                                    isInvitePending(notification.metadata.token)
+                                                }
+                                                onAcceptInvite={onAcceptInvite}
+                                                onDeclineInvite={onDeclineInvite}
+                                                isAccepting={acceptInviteMutation.isPending}
+                                                isDeclining={declineInviteMutation.isPending}
+                                                actionState={actionState[notification._id]}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Load more trigger */}
+                        <div ref={ref} className="py-4">
+                            {isFetchingNextPage && (
+                                <div className="flex justify-center">
+                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                </div>
+                            )}
+                            {!hasNextPage && filteredNotifications.length > 0 && (
+                                <div className="text-center">
+                                    <p className="text-sm text-muted-foreground">
+                                        You've seen all notifications
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

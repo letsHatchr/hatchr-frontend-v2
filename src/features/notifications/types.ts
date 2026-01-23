@@ -15,7 +15,7 @@ export interface NotificationEntity {
 export interface Notification {
     _id: string;
     recipient: string;
-    type: 'LIKE_POST' | 'COMMENT_POST' | 'NEW_FOLLOWER' | 'MENTION_POST' | 'MENTION_COMMENT' | 'PROJECT_INVITATION' | 'PROJECT_JOIN' | 'PROJECT_LEAVE' | 'milestone' | 'system' | 'INVITATION_ACCEPTED' | 'INVITATION_DECLINED';
+    type: 'LIKE_POST' | 'COMMENT_POST' | 'NEW_FOLLOWER' | 'MENTION_POST' | 'MENTION_COMMENT' | 'PROJECT_INVITATION' | 'PROJECT_JOIN' | 'PROJECT_LEAVE' | 'milestone' | 'system' | 'INVITATION_ACCEPTED' | 'INVITATION_DECLINED' | 'POST_COMMENT' | 'POST_UPVOTE' | 'COMMENT_REPLY';
     actor: NotificationActor;
     relatedEntity?: NotificationEntity;
     relatedEntityType?: 'Post' | 'Project' | 'Comment';
