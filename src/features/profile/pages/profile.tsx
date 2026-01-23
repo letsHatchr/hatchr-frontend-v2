@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,12 +9,22 @@ import { ProfileSidebar } from '../components/profile-sidebar';
 import { AboutSection } from '../components/about-section';
 import { HorizontalProjectCard } from '../components/horizontal-project-card';
 import { FollowersModal } from '../components/followers-modal';
+import { GripVertical, Check, X } from 'lucide-react';
+import { toast } from '@/lib/toast';
 import {
     useUserProfile,
     useUserProjects,
     useFollowUser,
     useUnfollowUser,
 } from '../hooks/use-user';
+import { useReorderProjects } from '../hooks/use-reorder-projects';
+
+interface Project {
+    _id: string;
+    title: string;
+    isArchived?: boolean;
+    [key: string]: unknown;
+}
 
 export function ProfilePage() {
     const { username } = useParams({ from: '/$username' });
@@ -24,19 +34,23 @@ export function ProfilePage() {
     // State
     const [showFollowersModal, setShowFollowersModal] = useState(false);
     const [modalTab, setModalTab] = useState<'followers' | 'following'>('followers');
+    const [isReorderMode, setIsReorderMode] = useState(false);
+    const [reorderedProjects, setReorderedProjects] = useState<Project[]>([]);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
     // API hooks
     const { data: profileData, isLoading: profileLoading, isError: profileError } = useUserProfile(username);
     const { data: projectsData } = useUserProjects(username);
     const followMutation = useFollowUser();
     const unfollowMutation = useUnfollowUser();
+    const reorderMutation = useReorderProjects();
 
     const user = profileData?.user;
     const projects = projectsData?.projects || [];
 
     // Filter non-archived projects
     const activeProjects = useMemo(() =>
-        projects.filter(p => !p.isArchived), [projects]
+        projects.filter((p: Project) => !p.isArchived), [projects]
     );
 
     // Computed values
@@ -73,6 +87,64 @@ export function ProfilePage() {
         setShowFollowersModal(true);
     };
 
+    // Reorder handlers
+    const handleStartReorder = () => {
+        setReorderedProjects([...activeProjects]);
+        setIsReorderMode(true);
+    };
+
+    const handleCancelReorder = () => {
+        setIsReorderMode(false);
+        setReorderedProjects([]);
+        setDraggedIndex(null);
+    };
+
+    const handleSaveReorder = async () => {
+        try {
+            const projectIds = reorderedProjects.map(p => p._id);
+            await reorderMutation.mutateAsync({ projectIds });
+            toast.success('Project order saved!');
+            setIsReorderMode(false);
+            setReorderedProjects([]);
+        } catch {
+            toast.error('Failed to save order');
+        }
+    };
+
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === index) return;
+
+        const newOrder = [...reorderedProjects];
+        const [draggedItem] = newOrder.splice(draggedIndex, 1);
+        newOrder.splice(index, 0, draggedItem);
+        setReorderedProjects(newOrder);
+        setDraggedIndex(index);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+    };
+
+    // Touch handlers for mobile
+    const handleMoveUp = useCallback((index: number) => {
+        if (index === 0) return;
+        const newOrder = [...reorderedProjects];
+        [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+        setReorderedProjects(newOrder);
+    }, [reorderedProjects]);
+
+    const handleMoveDown = useCallback((index: number) => {
+        if (index === reorderedProjects.length - 1) return;
+        const newOrder = [...reorderedProjects];
+        [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+        setReorderedProjects(newOrder);
+    }, [reorderedProjects]);
+
     // Loading state
     if (profileLoading) {
         return (
@@ -108,6 +180,7 @@ export function ProfilePage() {
     }
 
     const followLoading = followMutation.isPending || unfollowMutation.isPending;
+    const displayProjects = isReorderMode ? reorderedProjects : activeProjects;
 
     return (
         <div className="min-h-screen bg-background pb-24 lg:pb-0">
@@ -136,9 +209,45 @@ export function ProfilePage() {
 
                         {/* Projects Section */}
                         <section>
-                            <h2 className="text-2xl font-bold mb-4">Hatched Projects</h2>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-2xl font-bold">Hatched Projects</h2>
+                                {isOwnProfile && activeProjects.length > 1 && (
+                                    <div className="flex items-center gap-2">
+                                        {isReorderMode ? (
+                                            <>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={handleCancelReorder}
+                                                    disabled={reorderMutation.isPending}
+                                                >
+                                                    <X className="h-4 w-4 mr-1" />
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={handleSaveReorder}
+                                                    disabled={reorderMutation.isPending}
+                                                >
+                                                    <Check className="h-4 w-4 mr-1" />
+                                                    {reorderMutation.isPending ? 'Saving...' : 'Save Order'}
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleStartReorder}
+                                            >
+                                                <GripVertical className="h-4 w-4 mr-1" />
+                                                Edit Order
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
-                            {activeProjects.length === 0 ? (
+                            {displayProjects.length === 0 ? (
                                 <div className="bg-card rounded-lg border p-12 text-center">
                                     <p className="text-muted-foreground">
                                         {isOwnProfile
@@ -148,8 +257,44 @@ export function ProfilePage() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {activeProjects.map((project) => (
-                                        <HorizontalProjectCard key={project._id} project={project} />
+                                    {displayProjects.map((project: Project, index: number) => (
+                                        <div
+                                            key={project._id}
+                                            className={`flex items-stretch gap-2 ${isReorderMode ? 'group' : ''}`}
+                                            draggable={isReorderMode}
+                                            onDragStart={() => handleDragStart(index)}
+                                            onDragOver={(e) => handleDragOver(e, index)}
+                                            onDragEnd={handleDragEnd}
+                                        >
+                                            {isReorderMode && (
+                                                <div className="flex flex-col items-center justify-center gap-1 pr-1">
+                                                    {/* Drag handle */}
+                                                    <div className="hidden sm:flex items-center justify-center w-8 h-full cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground bg-muted/50 rounded-l-lg">
+                                                        <GripVertical className="h-5 w-5" />
+                                                    </div>
+                                                    {/* Mobile up/down buttons */}
+                                                    <div className="flex sm:hidden flex-col gap-1">
+                                                        <button
+                                                            onClick={() => handleMoveUp(index)}
+                                                            disabled={index === 0}
+                                                            className="p-1 rounded bg-muted/50 hover:bg-muted disabled:opacity-30"
+                                                        >
+                                                            ▲
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleMoveDown(index)}
+                                                            disabled={index === displayProjects.length - 1}
+                                                            className="p-1 rounded bg-muted/50 hover:bg-muted disabled:opacity-30"
+                                                        >
+                                                            ▼
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className="flex-1">
+                                                <HorizontalProjectCard project={project} />
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             )}
@@ -172,3 +317,4 @@ export function ProfilePage() {
 }
 
 export default ProfilePage;
+

@@ -70,7 +70,7 @@ export function useUpdatePost() {
     });
 }
 
-// Vote on a post
+// Vote on a post - Optimistic update (Reddit-style, no refetch/reorder)
 export function useVotePost() {
     const queryClient = useQueryClient();
 
@@ -83,15 +83,108 @@ export function useVotePost() {
             return response.data;
         },
         onMutate: async ({ postId, voteType }) => {
-            // Cancel any outgoing refetches
+            // Cancel any outgoing refetches to avoid overwriting optimistic update
             await queryClient.cancelQueries({ queryKey: postKeys.all });
 
-            // Optimistic update could go here if needed
-            return { postId, voteType };
+            // Snapshot previous value for rollback
+            const previousData = queryClient.getQueriesData({ queryKey: postKeys.all });
+
+            // Optimistically update all feed caches containing this post
+            queryClient.setQueriesData(
+                { queryKey: postKeys.all },
+                (oldData: unknown) => {
+                    if (!oldData) return oldData;
+
+                    // Handle infinite query structure (pages array)
+                    if (typeof oldData === 'object' && 'pages' in (oldData as Record<string, unknown>)) {
+                        const data = oldData as { pages: Array<{ posts?: Post[] }> };
+                        return {
+                            ...data,
+                            pages: data.pages.map(page => ({
+                                ...page,
+                                posts: page.posts?.map(post => {
+                                    if (post._id !== postId) return post;
+
+                                    const currentlyUpvoted = post.hasUpvoted;
+                                    const currentlyDownvoted = post.hasDownvoted;
+
+                                    if (voteType === 'up') {
+                                        return {
+                                            ...post,
+                                            hasUpvoted: !currentlyUpvoted,
+                                            hasDownvoted: false,
+                                            upvoteCount: currentlyUpvoted
+                                                ? (post.upvoteCount || 1) - 1
+                                                : (post.upvoteCount || 0) + 1,
+                                            downvoteCount: currentlyDownvoted
+                                                ? (post.downvoteCount || 1) - 1
+                                                : post.downvoteCount || 0,
+                                        };
+                                    } else {
+                                        return {
+                                            ...post,
+                                            hasDownvoted: !currentlyDownvoted,
+                                            hasUpvoted: false,
+                                            downvoteCount: currentlyDownvoted
+                                                ? (post.downvoteCount || 1) - 1
+                                                : (post.downvoteCount || 0) + 1,
+                                            upvoteCount: currentlyUpvoted
+                                                ? (post.upvoteCount || 1) - 1
+                                                : post.upvoteCount || 0,
+                                        };
+                                    }
+                                })
+                            }))
+                        };
+                    }
+                    return oldData;
+                }
+            );
+
+            return { previousData };
         },
-        onSuccess: () => {
-            // Invalidate feed to refetch with updated votes
-            queryClient.invalidateQueries({ queryKey: postKeys.all });
+        onError: (_err, _vars, context) => {
+            // Rollback to previous state on error
+            if (context?.previousData) {
+                context.previousData.forEach(([queryKey, data]) => {
+                    queryClient.setQueryData(queryKey, data);
+                });
+            }
+        },
+        onSuccess: (data, { postId }) => {
+            // Update only vote-related fields from server response - preserve user data!
+            if (data.post) {
+                queryClient.setQueriesData(
+                    { queryKey: postKeys.all },
+                    (oldData: unknown) => {
+                        if (!oldData) return oldData;
+
+                        if (typeof oldData === 'object' && 'pages' in (oldData as Record<string, unknown>)) {
+                            const dd = oldData as { pages: Array<{ posts?: Post[] }> };
+                            return {
+                                ...dd,
+                                pages: dd.pages.map(page => ({
+                                    ...page,
+                                    posts: page.posts?.map(post => {
+                                        if (post._id !== postId) return post;
+                                        // Only update vote-related fields, keep everything else (user, content, etc.)
+                                        return {
+                                            ...post,
+                                            hasUpvoted: data.post.hasUpvoted,
+                                            hasDownvoted: data.post.hasDownvoted,
+                                            upvoteCount: data.post.upvoteCount,
+                                            downvoteCount: data.post.downvoteCount,
+                                            upvotes: data.post.upvotes,
+                                            downvotes: data.post.downvotes,
+                                        };
+                                    })
+                                }))
+                            };
+                        }
+                        return oldData;
+                    }
+                );
+            }
         },
     });
 }
