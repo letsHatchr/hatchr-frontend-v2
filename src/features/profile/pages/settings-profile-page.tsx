@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/lib/toast';
 import { useUserUpdate, useUserProfile, useUploadAvatar, useUploadBanner } from '../hooks/use-user';
 import { useAuthStore } from '@/store';
-import { Plus, Trash2, Save, ArrowLeft, Camera, Image as ImageIcon, Loader2, User, Mail, Settings } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Camera, Image as ImageIcon, Loader2, User, Mail } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from '@tanstack/react-router';
 import { EmailNotificationsSettings } from '../components/settings/email-notifications-settings';
