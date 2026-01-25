@@ -15,3 +15,5 @@ export * from './components/comment-section';
 // Pages
 export { FeedPage } from './pages/feed';
 export { PostPage } from './pages/post-page';
+export { TechNewsPage } from './pages/tech-news-page';
+

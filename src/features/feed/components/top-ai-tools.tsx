@@ -56,12 +56,17 @@ export function TopAITools() {
                 {isLoading ? (
                     // Loading skeleton
                     Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2">
-                            <Skeleton className="h-10 w-10 rounded-lg" />
-                            <div className="flex-1 space-y-1">
+                        <div key={i} className="flex items-start gap-3 p-3 border-b last:border-b-0">
+                            <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
+                            <div className="flex-1 space-y-2">
                                 <Skeleton className="h-4 w-32" />
                                 <Skeleton className="h-3 w-full" />
+                                <div className="flex gap-1.5 pt-1">
+                                    <Skeleton className="h-5 w-16 rounded-full" />
+                                    <Skeleton className="h-5 w-20 rounded-full" />
+                                </div>
                             </div>
+                            <Skeleton className="h-12 w-12 rounded-lg flex-shrink-0" />
                         </div>
                     ))
                 ) : isError ? (
@@ -77,44 +82,61 @@ export function TopAITools() {
                         </a>
                     </div>
                 ) : tools.length > 0 ? (
-                    tools.map((tool) => (
+                    tools.map((tool, index) => (
                         <a
                             key={tool.id}
                             href={tool.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group flex items-center gap-3 rounded-lg p-2 hover:bg-accent transition-colors"
+                            className="group flex items-start gap-3 rounded-lg p-3 hover:bg-accent transition-colors border-b last:border-b-0"
                         >
+                            {/* Rank Badge */}
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-sm font-bold text-primary">#{index + 1}</span>
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0 space-y-1.5">
+                                <div className="flex items-center gap-2">
+                                    <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
+                                        {tool.name}
+                                    </p>
+                                    <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary flex-shrink-0" />
+                                </div>
+
+                                {/* Tagline / Description */}
+                                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                                    {tool.tagline}
+                                </p>
+
+                                {/* Category Tags */}
+                                {tool.topics && tool.topics.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5 pt-1">
+                                        {tool.topics.slice(0, 2).map((topic, i) => (
+                                            <Badge
+                                                key={i}
+                                                variant="outline"
+                                                className="text-[10px] px-2 py-0 h-5 font-medium text-primary border-primary/30 bg-primary/5"
+                                            >
+                                                {topic}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             {/* Tool Thumbnail */}
                             {tool.thumbnail ? (
                                 <img
                                     src={tool.thumbnail}
                                     alt={tool.name}
-                                    className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
+                                    className="h-12 w-12 rounded-lg object-cover flex-shrink-0"
                                 />
                             ) : (
-                                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
+                                <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
                                     <Sparkles className="h-5 w-5 text-primary" />
                                 </div>
                             )}
-
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1">
-                                    <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                                        {tool.name}
-                                    </p>
-                                    <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary flex-shrink-0" />
-                                </div>
-                                <p className="text-xs text-muted-foreground line-clamp-1">
-                                    {tool.tagline}
-                                </p>
-                            </div>
-
-                            {/* Votes */}
-                            <Badge variant="secondary" className="flex-shrink-0 text-xs">
-                                ▲ {tool.votes}
-                            </Badge>
                         </a>
                     ))
                 ) : (

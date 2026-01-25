@@ -15,7 +15,7 @@ import {
 } from '@/features/auth';
 
 // Feed
-import { FeedPage, PostPage } from '@/features/feed';
+import { FeedPage, PostPage, TechNewsPage } from '@/features/feed';
 import { LeaderboardPage } from '@/features/feed/pages/leaderboard-page';
 import { CreatePage } from '@/features/feed/pages/create-page';
 
@@ -206,6 +206,13 @@ const leaderboardRoute = createRoute({
     component: LeaderboardPage,
 });
 
+// Tech News route (must come before profile catch-all)
+const techNewsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/tech-news',
+    component: TechNewsPage,
+});
+
 // Profile route (user profile with @username or just username)
 const profileRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -240,5 +247,7 @@ export const routeTree = rootRoute.addChildren([
     searchRoute,
     createPageRoute,  // Must come before profileRoute
     leaderboardRoute, // Must come before profileRoute
+    techNewsRoute,    // Must come before profileRoute
     profileRoute,
 ]);
+

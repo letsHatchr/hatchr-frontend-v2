@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, X, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/auth-store';
 import api from '@/lib/api';
 import { toast } from '@/lib/toast';
-import { cn } from '@/lib/utils';
+
 
 interface AIExplainButtonProps {
     type: 'post' | 'project';
