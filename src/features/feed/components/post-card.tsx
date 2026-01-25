@@ -155,7 +155,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                             <div className="flex items-center gap-2">
                                 <a
                                     href={`/${postUser.username}`}
-                                    className={cn("font-medium hover:underline", isTimeline ? "" : "text-base")}
+                                    className={cn("font-medium hover:underline", isTimeline ? "" : "text-sm")}
                                 >
                                     {postUser.name}
                                 </a>
@@ -229,10 +229,13 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                 </div>
             </CardHeader>
 
-            <CardContent className={cn(isTimeline ? "p-3 pt-3 pb-1" : "p-3 sm:p-5 pt-2 sm:pt-0 pb-3")}>
+            <CardContent className="p-0">
                 {/* Title - clickable to expand/collapse ONLY in timeline */}
                 <div
-                    className={cn("flex flex-col gap-1 group", isTimeline && "cursor-pointer")}
+                    className={cn(
+                        "flex flex-col gap-0 group",
+                        isTimeline ? "cursor-pointer p-3 pt-3 pb-1" : "p-3 sm:p-5 pt-1 sm:pt-0 pb-2 sm:pb-2 sm:-mt-2"
+                    )}
                     onClick={() => isTimeline && setIsCollapsed(!isCollapsed)}
                 >
                     <div className="flex items-start justify-between gap-2">
@@ -241,8 +244,8 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                             onClick={(e) => e.stopPropagation()} // Prevent collapse toggle when clicking link
                         >
                             <h3 className={cn(
-                                "font-semibold hover:underline decoration-2 underline-offset-2",
-                                isTimeline ? "text-lg" : "text-xl mb-2"
+                                "font-semibold hover:underline decoration-2 underline-offset-2 leading-tight",
+                                isTimeline ? "text-lg" : "text-base mb-0"
                             )}>
                                 {post.title}
                             </h3>
@@ -278,113 +281,122 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                 {/* Content - Hidden when collapsed (Timeline), always visible (Feed) */}
                 {(!isTimeline || !isCollapsed) && (
                     <>
-                        {/* Media Preview - Always First */}
+                        {/* Media Preview - Always First - Full Bleed */}
                         {post.media && post.media.length > 0 && (
-                            <MediaCarousel media={post.media} className={isTimeline ? "mt-0" : "mt-0"} />
+                            <MediaCarousel
+                                media={post.media}
+                                className={cn(
+                                    "w-full rounded-none border-none sm:rounded-none sm:border-none",
+                                    isTimeline ? "mt-0" : "mt-0"
+                                )}
+                            />
                         )}
 
+                        <div className={cn(
+                            isTimeline ? "p-3 pt-0 pb-1" : "p-3 sm:p-5 pt-1 sm:pt-1 pb-1 sm:pb-1"
+                        )}>
+                            {/* Caption/Content */}
+                            {post.caption && (
+                                <PostContent caption={post.caption} format={post.contentFormat} />
+                            )}
 
-                        {/* Caption/Content */}
-                        {post.caption && (
-                            <PostContent caption={post.caption} format={post.contentFormat} />
-                        )}
+                            {/* Attached Files */}
+                            {post.files && post.files.length > 0 && (
+                                <div className="mt-3">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full justify-between group"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            // Toggle visibility logic or open modal?
+                                            // User asked to show number, maybe just expand list on click
+                                            const fileList = document.getElementById(`files-${post._id}`);
+                                            if (fileList) {
+                                                fileList.classList.toggle('hidden');
+                                            }
+                                        }}
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <Paperclip className="h-4 w-4" />
+                                            {post.files.length} Attached File{post.files.length !== 1 ? 's' : ''}
+                                        </span>
+                                        <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                    </Button>
 
-                        {/* Attached Files */}
-                        {post.files && post.files.length > 0 && (
-                            <div className="mt-3">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full justify-between group"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        // Toggle visibility logic or open modal?
-                                        // User asked to show number, maybe just expand list on click
-                                        const fileList = document.getElementById(`files-${post._id}`);
-                                        if (fileList) {
-                                            fileList.classList.toggle('hidden');
-                                        }
-                                    }}
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <Paperclip className="h-4 w-4" />
-                                        {post.files.length} Attached File{post.files.length !== 1 ? 's' : ''}
-                                    </span>
-                                    <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                                </Button>
-
-                                <div id={`files-${post._id}`} className="hidden mt-2 space-y-2 overflow-hidden">
-                                    {post.files.map((file: any) => (
-                                        <div
-                                            key={file._id}
-                                            className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border hover:bg-muted transition-colors overflow-hidden"
-                                        >
-                                            {/* File icon */}
+                                    <div id={`files-${post._id}`} className="hidden mt-2 space-y-2 overflow-hidden">
+                                        {post.files.map((file: any) => (
                                             <div
-                                                className="h-8 w-8 rounded bg-background flex items-center justify-center border text-muted-foreground flex-shrink-0 cursor-pointer"
-                                                onClick={() => setPreviewFile(file)}
+                                                key={file._id}
+                                                className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border hover:bg-muted transition-colors overflow-hidden"
                                             >
-                                                <FileIcon fileType={file.fileType} />
-                                            </div>
-
-                                            {/* File info - must shrink */}
-                                            <div
-                                                className="flex-1 overflow-hidden cursor-pointer"
-                                                onClick={() => setPreviewFile(file)}
-                                            >
-                                                <p className="text-sm font-medium truncate block">{file.originalFileName || file.fileName}</p>
-                                                <p className="text-xs text-muted-foreground">{(file.fileSize ? (file.fileSize / 1024).toFixed(0) : '0')} KB</p>
-                                            </div>
-
-                                            {/* Action buttons */}
-                                            <div className="flex items-center flex-shrink-0 gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setPreviewFile(file);
-                                                    }}
-                                                    className="h-8 w-8"
-                                                    title="Preview"
+                                                {/* File icon */}
+                                                <div
+                                                    className="h-8 w-8 rounded bg-background flex items-center justify-center border text-muted-foreground flex-shrink-0 cursor-pointer"
+                                                    onClick={() => setPreviewFile(file)}
                                                 >
-                                                    <Eye className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={async (e) => {
-                                                        e.stopPropagation();
-                                                        try {
-                                                            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/files/${file._id}/download`);
-                                                            const data = await response.json();
-                                                            if (data.success && data.downloadUrl) {
-                                                                window.open(data.downloadUrl, '_blank');
+                                                    <FileIcon fileType={file.fileType} />
+                                                </div>
+
+                                                {/* File info - must shrink */}
+                                                <div
+                                                    className="flex-1 overflow-hidden cursor-pointer"
+                                                    onClick={() => setPreviewFile(file)}
+                                                >
+                                                    <p className="text-sm font-medium truncate block">{file.originalFileName || file.fileName}</p>
+                                                    <p className="text-xs text-muted-foreground">{(file.fileSize ? (file.fileSize / 1024).toFixed(0) : '0')} KB</p>
+                                                </div>
+
+                                                {/* Action buttons */}
+                                                <div className="flex items-center flex-shrink-0 gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setPreviewFile(file);
+                                                        }}
+                                                        className="h-8 w-8"
+                                                        title="Preview"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            try {
+                                                                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/files/${file._id}/download`);
+                                                                const data = await response.json();
+                                                                if (data.success && data.downloadUrl) {
+                                                                    window.open(data.downloadUrl, '_blank');
+                                                                }
+                                                            } catch (error) {
+                                                                console.error('Download error:', error);
                                                             }
-                                                        } catch (error) {
-                                                            console.error('Download error:', error);
-                                                        }
-                                                    }}
-                                                    className="h-8 w-8"
-                                                    title="Download"
-                                                >
-                                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                    </svg>
-                                                </Button>
+                                                        }}
+                                                        className="h-8 w-8"
+                                                        title="Download"
+                                                    >
+                                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                        </svg>
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </>
                 )}
             </CardContent>
 
             {/* Footer */}
             {(!isTimeline || !isCollapsed) && (
-                <CardFooter className={cn(isTimeline ? "p-3 pt-1" : "p-5 pt-2")}>
+                <CardFooter className={cn(isTimeline ? "p-3 pt-1" : "p-3 sm:p-5 pt-0 sm:pt-0")}>
                     <div className="flex items-center gap-1 w-full">
                         {/* Vote Buttons */}
                         <div className="flex items-center gap-1 rounded-full bg-muted/50 p-1">
@@ -483,7 +495,7 @@ function PostContent({ caption, format }: { caption: string; format?: string }) 
     }, [caption]);
 
     return (
-        <div className="mt-3 relative">
+        <div className="mt-1 relative">
             <div
                 ref={contentRef}
                 className={cn(
