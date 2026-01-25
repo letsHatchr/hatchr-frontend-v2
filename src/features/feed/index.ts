@@ -11,9 +11,11 @@ export * from './components';
 export * from './components/post-card';
 export * from './components/media-carousel';
 export * from './components/comment-section';
+export { MobileDiscoverCards } from './components/mobile-discover-cards';
 
 // Pages
 export { FeedPage } from './pages/feed';
 export { PostPage } from './pages/post-page';
 export { TechNewsPage } from './pages/tech-news-page';
+export { DiscoverPage } from './pages/discover-page';
 

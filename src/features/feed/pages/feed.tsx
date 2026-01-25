@@ -14,6 +14,7 @@ import { TopInnovators } from '../components/top-innovators';
 import { TrendingProjects } from '../components/trending-projects';
 import { TopHeadlines } from '../components/top-headlines';
 import { TopAITools } from '../components/top-ai-tools';
+import { MobileDiscoverCards } from '../components/mobile-discover-cards';
 
 import { useFeedPosts } from '../hooks/use-posts';
 import type { FeedParams } from '../types';
@@ -125,6 +126,9 @@ export function FeedPage() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Mobile Discover Cards - Swipeable News & Tools */}
+                    <MobileDiscoverCards />
 
                     {/* Sort Pills */}
                     <div className="flex items-center gap-2 mb-2 sm:mb-6 overflow-x-auto pb-2 px-3 sm:px-0">
