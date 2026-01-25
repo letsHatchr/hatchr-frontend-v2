@@ -149,7 +149,7 @@ export function FeedPage() {
                     </div>
 
                     {/* Posts List */}
-                    <div className="space-y-0 sm:space-y-4">
+                    <div className="space-y-0 border-t border-border/50">
                         {isLoading ? (
                             Array.from({ length: 3 }).map((_, i) => (
                                 <PostCardSkeleton key={i} />

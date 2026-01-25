@@ -138,7 +138,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
     };
 
     return (
-        <Card className="overflow-hidden bg-background rounded-none sm:rounded-xl border-x-0 sm:border border-t-0 sm:border-t border-b border-border/50 sm:border-b-auto py-0 gap-0 shadow-none sm:shadow-sm">
+        <Card className="overflow-hidden bg-background rounded-none border-x-0 sm:border-x border-t-0 border-b border-border/50 py-0 gap-0 shadow-none">
             <CardHeader className={cn(isTimeline ? "p-3 pb-0" : "p-3 sm:p-5 pb-0")}>
                 <div className="flex items-start justify-between gap-1.5">
                     {/* Author and Meta */}
@@ -293,7 +293,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                         )}
 
                         <div className={cn(
-                            isTimeline ? "p-3 pt-0 pb-1" : "p-3 sm:p-5 pt-1 sm:pt-1 pb-1 sm:pb-1"
+                            isTimeline ? "p-3 pt-0 pb-1" : "p-3 sm:p-5 pt-1 sm:pt-1 pb-1 sm:pb-2"
                         )}>
                             {/* Caption/Content */}
                             {post.caption && (
