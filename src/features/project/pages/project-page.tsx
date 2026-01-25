@@ -22,7 +22,7 @@ export function ProjectPage() {
     const { slug } = useParams({ strict: false });
     const search = useSearch({ from: '/project/$slug' });
     const navigate = useNavigate();
-    const { user: currentUser } = useAuthStore();
+    const { user: currentUser, openLoginModal } = useAuthStore();
 
     const { data: project, isLoading, isError } = useProject(slug as string);
     const watchMutation = useWatchProject();
@@ -70,7 +70,7 @@ export function ProjectPage() {
     // Handle watch/unwatch
     const handleWatchToggle = async () => {
         if (!currentUser) {
-            toast.error('Please log in to watch this project');
+            openLoginModal();
             return;
         }
 

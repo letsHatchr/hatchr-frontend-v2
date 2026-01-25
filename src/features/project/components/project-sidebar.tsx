@@ -9,6 +9,7 @@ import { Eye, FileText, Image, Film, FileCode, Archive, ChevronRight, ChevronDow
 import type { Project, ProjectFile } from '../types';
 import { ProjectSettingsMenu } from './project-settings-menu';
 import { FilePreviewModal } from '@/components/file-preview-modal';
+import { AIExplainButton } from '@/components/ai-explain-button';
 import { useDownloadFile } from '../hooks/use-files';
 import { toast } from '@/lib/toast';
 
@@ -277,6 +278,16 @@ export function ProjectSidebar({
                     {watchLoading ? 'Loading...' : isWatching ? '✓ Watching' : 'Watch Project'}
                 </Button>
             )}
+
+            {/* AI Explain Button */}
+            <AIExplainButton
+                type="project"
+                id={project._id}
+                title={project.title}
+                variant="outline"
+                size="default"
+                className="w-full justify-center"
+            />
 
             {/* Settings Menu (owners only) - Moved to bottom */}
             {isOwner && (

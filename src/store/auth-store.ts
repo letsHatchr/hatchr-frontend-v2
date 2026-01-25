@@ -21,6 +21,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  showLoginModal: boolean;
 
   // Actions
   setUser: (user: User | null) => void;
@@ -28,6 +29,8 @@ interface AuthState {
   login: (user: User, token: string) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
+  openLoginModal: () => void;
+  closeLoginModal: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -36,7 +39,8 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      isLoading: false, // Start as false - no loading state needed on init
+      isLoading: false,
+      showLoginModal: false,
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
 
@@ -60,6 +64,10 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setLoading: (isLoading) => set({ isLoading }),
+
+      openLoginModal: () => set({ showLoginModal: true }),
+
+      closeLoginModal: () => set({ showLoginModal: false }),
     }),
     {
       name: 'auth-storage',

@@ -38,6 +38,7 @@ import type { Post } from '../types';
 import type { ProjectPost } from '@/features/project/types';
 import { useVotePost, useDeletePost } from '../hooks/use-posts';
 import { CreatePostModal } from '@/features/project/components/create-post-modal';
+import { AIExplainButton } from '@/components/ai-explain-button';
 
 interface PostCardProps {
     post: Post | ProjectPost;
@@ -46,7 +47,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, showProject = true, variant = 'feed' }: PostCardProps) {
-    const { user: currentUser, isAuthenticated } = useAuthStore();
+    const { user: currentUser, isAuthenticated, openLoginModal } = useAuthStore();
     const votePost = useVotePost();
     const deletePost = useDeletePost();
 
@@ -75,7 +76,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
 
     const handleVote = async (voteType: 'up' | 'down') => {
         if (!isAuthenticated) {
-            toast.error('Please log in', { description: 'You need to be logged in to vote.' });
+            openLoginModal();
             return;
         }
 
@@ -355,7 +356,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
                                                         try {
-                                                            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/files/${file._id}/download`);
+                                                            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/files/${file._id}/download`);
                                                             const data = await response.json();
                                                             if (data.success && data.downloadUrl) {
                                                                 window.open(data.downloadUrl, '_blank');
@@ -436,6 +437,14 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                             <Share2 className="h-4 w-4" />
                             <span className="hidden sm:inline">Share</span>
                         </Button>
+
+                        {/* AI Explain */}
+                        <AIExplainButton
+                            type="post"
+                            id={post._id}
+                            title={post.title}
+                            className="gap-1.5 text-muted-foreground"
+                        />
                     </div>
                 </CardFooter>
             )}

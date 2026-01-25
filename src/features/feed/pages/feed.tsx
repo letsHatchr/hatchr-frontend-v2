@@ -12,6 +12,8 @@ import { useAuthStore } from '@/store';
 import { PostCard } from '../components/post-card';
 import { TopInnovators } from '../components/top-innovators';
 import { TrendingProjects } from '../components/trending-projects';
+import { TopHeadlines } from '../components/top-headlines';
+import { TopAITools } from '../components/top-ai-tools';
 
 import { useFeedPosts } from '../hooks/use-posts';
 import type { FeedParams } from '../types';
@@ -195,10 +197,8 @@ export function FeedPage() {
                 {/* Right Sidebar - Desktop only - extends to right edge */}
                 <aside className="hidden lg:flex lg:justify-start">
                     <div className="w-[320px] space-y-6 sticky top-20">
-                        {/* Placeholder for AI News/Tools - can be added later */}
-                        <div className="text-center text-sm text-muted-foreground py-12 border border-dashed rounded-lg">
-                            AI News & Tools coming soon
-                        </div>
+                        <TopHeadlines />
+                        <TopAITools />
                     </div>
                 </aside>
             </div>

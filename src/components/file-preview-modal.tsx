@@ -62,7 +62,7 @@ export function FilePreviewModal({ open, onOpenChange, file }: FilePreviewModalP
 
         setDownloadLoading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/files/${file._id}/download`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/files/${file._id}/download`);
             const data = await response.json();
             if (data.success && data.downloadUrl) {
                 window.open(data.downloadUrl, '_blank');
@@ -83,7 +83,7 @@ export function FilePreviewModal({ open, onOpenChange, file }: FilePreviewModalP
 
             // Use backend proxy to avoid CORS and handle authentication if needed
             // We use the direct API URL which proxies the content from R2
-            fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/files/${file._id}/content`)
+            fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/files/${file._id}/content`)
                 .then(res => {
                     if (!res.ok) throw new Error('Failed to load file content');
                     return res.json();
@@ -182,7 +182,7 @@ function PdfPreview({ fileId }: { fileId: string }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/files/${fileId}/download`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/files/${fileId}/download`)
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.downloadUrl) {
@@ -218,7 +218,7 @@ function ImagePreview({ fileId, fileName }: { fileId: string; fileName: string }
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/files/${fileId}/download`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/files/${fileId}/download`)
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.downloadUrl) {

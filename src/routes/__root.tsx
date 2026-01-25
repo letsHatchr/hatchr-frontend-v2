@@ -36,6 +36,7 @@ import { SearchPage } from './search';
 // Root layout
 import { Navbar } from '@/components/navbar';
 import { MobileBottomNav } from '@/components/mobile-bottom-nav';
+import { LoginPromptModal } from '@/components/login-prompt-modal';
 
 const rootRoute = createRootRoute({
     component: () => (
@@ -43,6 +44,7 @@ const rootRoute = createRootRoute({
             <Navbar />
             <Outlet />
             <MobileBottomNav />
+            <LoginPromptModal />
             <Toaster
                 position="top-right"
                 richColors
