@@ -80,22 +80,9 @@ export function ProjectSidebar({
     return (
         <aside className="w-full space-y-3 lg:space-y-5">
             {/* Project Title */}
-            {/* Project Title & Image */}
-            <div className="flex gap-4 items-start">
-                {project.coverImage ? (
-                    <img
-                        src={project.coverImage}
-                        alt={project.title}
-                        className="h-16 w-16 rounded-xl object-cover border border-border/50 shadow-sm flex-shrink-0"
-                    />
-                ) : (
-                    <div className="h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 flex-shrink-0">
-                        <FileText className="h-8 w-8 text-primary" />
-                    </div>
-                )}
-                <div>
-                    <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
-                </div>
+            {/* Project Title */}
+            <div>
+                <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
             </div>
 
             {/* Team Section - Owner + Partners */}

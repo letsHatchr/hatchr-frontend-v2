@@ -139,93 +139,102 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
     };
 
     return (
-        <Card className="overflow-hidden bg-background rounded-none border-x-0 sm:border-x border-t-0 border-b border-border/50 py-0 gap-0 shadow-none">
+        <Card className={cn(
+            "overflow-hidden py-0 gap-0 shadow-none",
+            isTimeline
+                ? "bg-card rounded-xl border mb-1"
+                : "bg-background rounded-none border-x-0 sm:border-x border-t-0 border-b border-border/50"
+        )}>
             <CardHeader className={cn(isTimeline ? "p-3 pb-0" : "p-3 sm:p-5 pb-0")}>
-                <div className="flex items-start justify-between gap-1.5">
-                    {/* Author and Meta */}
-                    <div className="flex items-center gap-2">
-                        <a href={`/${postUser.username}`}>
-                            <UserAvatar
-                                src={postUser.avatar}
-                                name={postUser.name}
-                                username={postUser.username}
-                                size={isTimeline ? "sm" : "md"}
-                            />
-                        </a>
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
+                <div className="flex items-start gap-3 w-full max-w-full">
+                    {/* Author Avatar */}
+                    <a href={`/${postUser.username}`} className="flex-shrink-0">
+                        <UserAvatar
+                            src={postUser.avatar}
+                            name={postUser.name}
+                            username={postUser.username}
+                            size={isTimeline ? "sm" : "md"}
+                        />
+                    </a>
+
+                    {/* Content Column */}
+                    <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+                        {/* Row 1: Name • Time • Badge • Menu */}
+                        <div className="flex items-center justify-between gap-2 w-full">
+                            {/* Left: Name • Time */}
+                            <div className="flex items-center gap-2 min-w-0 text-sm">
                                 <a
                                     href={`/${postUser.username}`}
-                                    className={cn("font-medium hover:underline", isTimeline ? "" : "text-sm")}
+                                    className="font-semibold hover:underline truncate"
                                 >
                                     {postUser.name}
                                 </a>
-                                <span className={cn("text-muted-foreground hidden sm:inline", isTimeline ? "text-sm" : "text-sm")}>
-                                    @{postUser.username}
+                                <span className="text-muted-foreground text-xs whitespace-nowrap flex-shrink-0">
+                                    • {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                                 </span>
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-xs text-muted-foreground">
-                                <span className="whitespace-nowrap">{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
-                                {showProject && post.project && (
-                                    <>
-                                        <span className="hidden sm:inline">•</span>
-                                        <a
-                                            href={`/project/${post.project.slug || post.project._id}`}
-                                            className="hover:underline text-primary truncate max-w-[200px] sm:max-w-[250px] inline-block"
-                                            title={post.project.title}
-                                        >
-                                            {post.project.title}
-                                        </a>
-                                    </>
-                                )}
+
+                            {/* Right: Badge • Menu */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                                <Badge className={cn(isTimeline ? 'text-xs' : 'text-xs', "whitespace-nowrap", postTypeColors[post.type] || 'bg-muted')}>
+                                    {post.type}
+                                </Badge>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                        <span className="sr-only">More options</span>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>
+                                            <Bookmark className="mr-2 h-4 w-4" />
+                                            Save
+                                        </DropdownMenuItem>
+                                        {currentUser?._id === post.user?._id && (
+                                            <DropdownMenuItem onClick={() => setShowEditModal(true)}>
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Edit
+                                            </DropdownMenuItem>
+                                        )}
+                                        {currentUser?._id === post.user?._id && (
+                                            <DropdownMenuItem
+                                                onClick={() => {
+                                                    if (window.confirm('Are you sure you want to delete this post?')) {
+                                                        deletePost.mutate(post._id);
+                                                    }
+                                                }}
+                                                className="text-destructive focus:text-destructive"
+                                            >
+                                                <Trash className="mr-2 h-4 w-4" />
+                                                Delete
+                                            </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuItem onClick={handleShare}>
+                                            <ExternalLink className="mr-2 h-4 w-4" />
+                                            Copy link
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-destructive">
+                                            <Flag className="mr-2 h-4 w-4" />
+                                            Report
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Post Type Badge & Menu */}
-                    <div className="flex items-center gap-2">
-                        <Badge className={cn(isTimeline ? 'text-xs' : 'text-xs', postTypeColors[post.type] || 'bg-muted')}>
-                            {post.type}
-                        </Badge>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                                <MoreHorizontal className="h-5 w-5" />
-                                <span className="sr-only">More options</span>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                    <Bookmark className="mr-2 h-4 w-4" />
-                                    Save
-                                </DropdownMenuItem>
-                                {currentUser?._id === post.user?._id && (
-                                    <DropdownMenuItem onClick={() => setShowEditModal(true)}>
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Edit
-                                    </DropdownMenuItem>
-                                )}
-                                {currentUser?._id === post.user?._id && (
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            if (window.confirm('Are you sure you want to delete this post?')) {
-                                                deletePost.mutate(post._id);
-                                            }
-                                        }}
-                                        className="text-destructive focus:text-destructive"
-                                    >
-                                        <Trash className="mr-2 h-4 w-4" />
-                                        Delete
-                                    </DropdownMenuItem>
-                                )}
-                                <DropdownMenuItem onClick={handleShare}>
-                                    <ExternalLink className="mr-2 h-4 w-4" />
-                                    Copy link
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">
-                                    <Flag className="mr-2 h-4 w-4" />
-                                    Report
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {/* Row 2: Project (Optional) */}
+                        {showProject && post.project && (
+                            <div className="mt-0.5 w-full min-w-0">
+                                <a
+                                    href={`/project/${post.project.slug || post.project._id}`}
+                                    className="text-xs text-primary hover:underline truncate block"
+                                    title={post.project.title}
+                                >
+                                    {post.project.title.length > 45
+                                        ? `${post.project.title.slice(0, 45)}...`
+                                        : post.project.title}
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </div>
             </CardHeader>
@@ -396,71 +405,73 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
             </CardContent>
 
             {/* Footer */}
-            {(!isTimeline || !isCollapsed) && (
-                <CardFooter className={cn(isTimeline ? "p-3 pt-1" : "p-3 sm:p-5 pt-0 sm:pt-0")}>
-                    <div className="flex items-center gap-1 w-full">
-                        {/* Vote Buttons */}
-                        <div className="flex items-center gap-1 rounded-full bg-muted/50 p-1">
+            {
+                (!isTimeline || !isCollapsed) && (
+                    <CardFooter className={cn(isTimeline ? "p-3 pt-1" : "p-3 sm:p-5 pt-0 sm:pt-0")}>
+                        <div className="flex items-center gap-1 w-full">
+                            {/* Vote Buttons */}
+                            <div className="flex items-center gap-1 rounded-full bg-muted/50 p-1">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn(
+                                        'h-8 w-8 rounded-full',
+                                        localUpvoted && 'text-green-500 bg-green-500/10'
+                                    )}
+                                    onClick={() => handleVote('up')}
+                                >
+                                    <ArrowBigUp className={cn('h-5 w-5', localUpvoted && 'fill-current')} />
+                                </Button>
+                                <span className={cn(
+                                    'min-w-[2rem] text-center text-sm font-medium',
+                                    localVoteCount > 0 && 'text-green-500',
+                                    localVoteCount < 0 && 'text-red-500'
+                                )}>
+                                    {localVoteCount}
+                                </span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn(
+                                        'h-8 w-8 rounded-full',
+                                        localDownvoted && 'text-red-500 bg-red-500/10'
+                                    )}
+                                    onClick={() => handleVote('down')}
+                                >
+                                    <ArrowBigDown className={cn('h-5 w-5', localDownvoted && 'fill-current')} />
+                                </Button>
+                            </div>
+
+                            {/* Comments */}
+                            <a href={`/post/${post.slug || post._id}#comments`}>
+                                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                                    <MessageCircle className="h-4 w-4" />
+                                    <span>{comments.length}</span>
+                                </Button>
+                            </a>
+
+                            {/* Share */}
                             <Button
                                 variant="ghost"
-                                size="icon"
-                                className={cn(
-                                    'h-8 w-8 rounded-full',
-                                    localUpvoted && 'text-green-500 bg-green-500/10'
-                                )}
-                                onClick={() => handleVote('up')}
+                                size="sm"
+                                className="gap-2 text-muted-foreground"
+                                onClick={handleShare}
                             >
-                                <ArrowBigUp className={cn('h-5 w-5', localUpvoted && 'fill-current')} />
+                                <Share2 className="h-4 w-4" />
+                                <span className="hidden sm:inline">Share</span>
                             </Button>
-                            <span className={cn(
-                                'min-w-[2rem] text-center text-sm font-medium',
-                                localVoteCount > 0 && 'text-green-500',
-                                localVoteCount < 0 && 'text-red-500'
-                            )}>
-                                {localVoteCount}
-                            </span>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className={cn(
-                                    'h-8 w-8 rounded-full',
-                                    localDownvoted && 'text-red-500 bg-red-500/10'
-                                )}
-                                onClick={() => handleVote('down')}
-                            >
-                                <ArrowBigDown className={cn('h-5 w-5', localDownvoted && 'fill-current')} />
-                            </Button>
+
+                            {/* AI Explain */}
+                            <AIExplainButton
+                                type="post"
+                                id={post._id}
+                                title={post.title}
+                                className="gap-1.5 text-muted-foreground"
+                            />
                         </div>
-
-                        {/* Comments */}
-                        <a href={`/post/${post.slug || post._id}#comments`}>
-                            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-                                <MessageCircle className="h-4 w-4" />
-                                <span>{comments.length}</span>
-                            </Button>
-                        </a>
-
-                        {/* Share */}
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="gap-2 text-muted-foreground"
-                            onClick={handleShare}
-                        >
-                            <Share2 className="h-4 w-4" />
-                            <span className="hidden sm:inline">Share</span>
-                        </Button>
-
-                        {/* AI Explain */}
-                        <AIExplainButton
-                            type="post"
-                            id={post._id}
-                            title={post.title}
-                            className="gap-1.5 text-muted-foreground"
-                        />
-                    </div>
-                </CardFooter>
-            )}
+                    </CardFooter>
+                )
+            }
 
             <CreatePostModal
                 open={showEditModal}
@@ -473,7 +484,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                 onOpenChange={(open) => !open && setPreviewFile(null)}
                 file={previewFile}
             />
-        </Card>
+        </Card >
     );
 }
 
