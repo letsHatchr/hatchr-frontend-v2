@@ -142,7 +142,7 @@ export function LeaderboardPage() {
                                             <FileText className="h-5 w-5 text-muted-foreground" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-sm truncate">{project.title}</p>
+                                            <p className="font-medium text-sm line-clamp-2 leading-tight break-words">{project.title}</p>
                                             <p className="text-xs text-muted-foreground truncate">
                                                 by {project.user?.username || 'Unknown'}
                                             </p>

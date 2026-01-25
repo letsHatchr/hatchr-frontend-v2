@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouterState } from '@tanstack/react-router';
-import { Home, Search, PlusSquare, Trophy, Compass } from 'lucide-react';
+import { Home, Search, PlusSquare, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store';
 import { UserAvatar } from '@/components/user-avatar';
@@ -10,7 +10,6 @@ const navItems = [
     { href: '/feed', icon: Home, label: 'Home' },
     { href: '/search', icon: Search, label: 'Search' },
     { href: '/create', icon: PlusSquare, label: 'Post', isAction: true },
-    { href: '/discover', icon: Compass, label: 'Discover' },
     { href: '/leaderboard', icon: Trophy, label: 'Ranks' },
 ];
 

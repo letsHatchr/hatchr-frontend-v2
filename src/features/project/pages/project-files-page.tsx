@@ -116,8 +116,8 @@ export function ProjectFilesPage() {
         <div className="container mx-auto px-4 py-8 max-w-7xl">
             {/* Layout: Sidebar + Main Content */}
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                {/* Same Sidebar - Full width on mobile, fixed width on desktop */}
-                <div className="w-full lg:w-80 flex-shrink-0">
+                {/* Sidebar - Hidden on mobile for files page, visible on desktop */}
+                <div className="hidden lg:block lg:w-80 flex-shrink-0">
                     <ProjectSidebar
                         project={project}
                         isOwner={!!isOwner}
@@ -129,9 +129,17 @@ export function ProjectFilesPage() {
 
                 {/* Files Content */}
                 <main className="flex-1 min-w-0">
-                    {/* Cover Image */}
+                    {/* Mobile: Back to Timeline link */}
+                    <a
+                        href={`/project/${project.slug || project._id}`}
+                        className="lg:hidden flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 mb-4"
+                    >
+                        ← Back to Timeline
+                    </a>
+
+                    {/* Cover Image - Desktop only */}
                     {project.coverImage && (
-                        <div className="relative h-48 mb-6 rounded-lg overflow-hidden">
+                        <div className="hidden lg:block relative h-48 mb-6 rounded-lg overflow-hidden">
                             <img
                                 src={project.coverImage}
                                 alt={project.title}

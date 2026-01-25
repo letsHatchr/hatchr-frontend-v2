@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from '@tanstack/react-router';
-import { Plus, LogOut, User, Settings, Eye, Bell, Menu } from 'lucide-react';
+import { Plus, LogOut, User, Settings, Eye, Bell, Menu, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { UserAvatar } from '@/components/user-avatar';
@@ -76,6 +76,11 @@ export function Navbar() {
                                 {unreadCount > 0 && (
                                     <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-background animate-pulse" />
                                 )}
+                            </button>
+                        </Link>
+                        <Link to="/discover" className="lg:hidden">
+                            <button className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-all focus:outline-none" title="Discover">
+                                <Compass className="h-6 w-6 shrink-0" />
                             </button>
                         </Link>
                         <Link to="/watching">

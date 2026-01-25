@@ -126,8 +126,8 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                 </h3>
             </div>
 
-            {/* Files list */}
-            <div className="divide-y">
+            {/* Files grid - Modern card layout */}
+            <div className="p-4 space-y-3">
                 {files.map((file) => {
                     const extension = getFileExtension(file.originalFileName);
                     const FileIcon = getFileIcon(extension);
@@ -139,111 +139,105 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                     return (
                         <div
                             key={file._id}
-                            className="p-4 hover:bg-accent/50 transition-colors"
+                            className="group relative bg-card rounded-xl border border-border/50 hover:border-border hover:shadow-lg transition-all duration-200 overflow-hidden"
                         >
-                            <div className="flex items-start gap-3 sm:gap-4">
-                                {/* File icon */}
-                                <div className="flex-shrink-0">
+                            <div className="p-4">
+                                <div className="flex items-start gap-4">
+                                    {/* File icon - Enhanced with gradient background */}
                                     <div
-                                        className="h-10 w-10 sm:h-12 sm:w-12 bg-primary/10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors"
+                                        className="flex-shrink-0 cursor-pointer"
                                         onClick={() => setPreviewFile(file)}
                                     >
-                                        <FileIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                                        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/10 group-hover:ring-primary/30 transition-all">
+                                            <FileIcon className="h-7 w-7 text-primary" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* File info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
-                                        <div className="flex-1 min-w-0">
-                                            <h4
-                                                className="text-sm font-medium truncate mb-1 cursor-pointer hover:underline hover:text-primary"
-                                                onClick={() => setPreviewFile(file)}
-                                            >
-                                                {file.originalFileName}
-                                            </h4>
+                                    {/* File info */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex-1 min-w-0">
+                                                {/* File name */}
+                                                <h4
+                                                    className="font-semibold text-base truncate cursor-pointer hover:text-primary transition-colors"
+                                                    onClick={() => setPreviewFile(file)}
+                                                >
+                                                    {file.originalFileName}
+                                                </h4>
 
-                                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                                <span>{formatFileSize(file.fileSize)}</span>
-                                                <span>•</span>
-                                                <Badge className={`${categoryColor} text-[10px]`}>
-                                                    {category}
-                                                </Badge>
-                                                <span className="hidden sm:inline">•</span>
-                                                <span className="hidden sm:inline">
-                                                    {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}
-                                                </span>
-                                                {file.downloadCount > 0 && (
-                                                    <>
-                                                        <span className="hidden sm:inline">•</span>
-                                                        <span className="hidden sm:inline">
-                                                            {file.downloadCount} download{file.downloadCount !== 1 ? 's' : ''}
+                                                {/* Metadata row */}
+                                                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                                    <span className="text-sm text-muted-foreground font-medium">
+                                                        {formatFileSize(file.fileSize)}
+                                                    </span>
+                                                    <Badge className={`${categoryColor} text-xs font-medium px-2 py-0.5`}>
+                                                        {category}
+                                                    </Badge>
+                                                </div>
+
+                                                {/* Uploader info - Cleaner styling */}
+                                                {file.uploadedBy && (
+                                                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+                                                        <UserAvatar
+                                                            src={file.uploadedBy.avatar}
+                                                            name={file.uploadedBy.name}
+                                                            username={file.uploadedBy.username}
+                                                            size="xs"
+                                                        />
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {file.uploadedBy.name}
                                                         </span>
-                                                    </>
+                                                        <span className="hidden sm:inline text-xs text-muted-foreground/60">
+                                                            • {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}
+                                                        </span>
+                                                    </div>
                                                 )}
                                             </div>
 
-                                            {/* Uploader info */}
-                                            {file.uploadedBy && (
-                                                <div className="flex items-center gap-2 mt-2">
-                                                    <UserAvatar
-                                                        src={file.uploadedBy.avatar}
-                                                        name={file.uploadedBy.name}
-                                                        username={file.uploadedBy.username}
-                                                        size="xs"
-                                                    />
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {file.uploadedBy.name}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Action buttons */}
-                                        <div className="flex items-center gap-1 flex-shrink-0">
-                                            {/* Preview button */}
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setPreviewFile(file)}
-                                                className="text-muted-foreground hover:text-foreground"
-                                                title="Preview"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-
-                                            {/* Download button */}
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handleDownload(file._id, file.originalFileName)}
-                                                disabled={isDownloading || isDeleting}
-                                                title="Download"
-                                            >
-                                                {isDownloading ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <Download className="h-4 w-4" />
-                                                )}
-                                            </Button>
-
-                                            {/* Delete button (if user can delete) */}
-                                            {canDeleteFile(file) && (
+                                            {/* Action buttons - Refined with better hover states */}
+                                            <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => handleDelete(file._id, file.originalFileName)}
-                                                    disabled={isDeleting || isDownloading}
-                                                    className="text-destructive hover:text-destructive"
-                                                    title="Delete"
+                                                    onClick={() => setPreviewFile(file)}
+                                                    className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary"
+                                                    title="Preview"
                                                 >
-                                                    {isDeleting ? (
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleDownload(file._id, file.originalFileName)}
+                                                    disabled={isDownloading || isDeleting}
+                                                    className="h-9 w-9 rounded-lg hover:bg-green-500/10 hover:text-green-500"
+                                                    title="Download"
+                                                >
+                                                    {isDownloading ? (
                                                         <Loader2 className="h-4 w-4 animate-spin" />
                                                     ) : (
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Download className="h-4 w-4" />
                                                     )}
                                                 </Button>
-                                            )}
+
+                                                {canDeleteFile(file) && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDelete(file._id, file.originalFileName)}
+                                                        disabled={isDeleting || isDownloading}
+                                                        className="h-9 w-9 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                                                        title="Delete"
+                                                    >
+                                                        {isDeleting ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

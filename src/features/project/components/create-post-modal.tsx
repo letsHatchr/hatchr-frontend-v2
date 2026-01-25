@@ -401,7 +401,7 @@ export function CreatePostModal({ open, onOpenChange, projectId, post }: CreateP
                     )}
 
                     {/* Footer Actions */}
-                    <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t">
+                    <div className="grid grid-cols-2 gap-3 pt-4 border-t sm:flex sm:flex-row sm:justify-end">
                         <Button
                             type="button"
                             variant="outline"
