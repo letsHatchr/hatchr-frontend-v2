@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserAvatar } from '@/components/user-avatar';
 import { TiptapRenderer } from '@/components/editor';
+import { EditorJsRenderer } from '@/components/editorjs-renderer';
 import { useAuthStore } from '@/store';
 import { toast } from '@/lib/toast';
 import type { Post } from '../types';
@@ -506,7 +507,7 @@ function PostContent({ caption, format }: { caption: string; format?: string }) 
                 {isTiptap ? (
                     <TiptapRenderer content={caption} />
                 ) : (
-                    <p className="whitespace-pre-wrap">{extractPlainText(caption)}</p>
+                    <EditorJsRenderer content={caption} />
                 )}
 
                 {/* Gradient removed as per user request */}
