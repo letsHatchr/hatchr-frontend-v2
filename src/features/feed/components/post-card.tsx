@@ -143,7 +143,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
             "overflow-hidden py-0 gap-0 shadow-none",
             isTimeline
                 ? "bg-card rounded-xl border mb-1"
-                : "bg-background rounded-none border-x-0 sm:border-x border-t-0 border-b border-border/50"
+                : "bg-card rounded-none border-x-0 sm:border-x border-t-0 border-b border-border/50"
         )}>
             <CardHeader className={cn(isTimeline ? "p-3 pb-0" : "p-3 sm:p-5 pb-0")}>
                 <div className="flex items-start gap-3 w-full max-w-full">

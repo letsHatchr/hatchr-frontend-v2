@@ -85,9 +85,27 @@ function BlockRenderer({ block }: { block: EditorJsBlock }) {
             const ListTag = data.style === 'ordered' ? 'ol' : 'ul';
             return (
                 <ListTag className={cn("ml-4 space-y-1", data.style === 'ordered' ? "list-decimal" : "list-disc")}>
-                    {data.items.map((item: string, i: number) => (
-                        <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
-                    ))}
+                    {data.items.map((item: any, i: number) => {
+                        const content = typeof item === 'string' ? item : item.content;
+                        const nestedItems = typeof item === 'object' && item.items && Array.isArray(item.items) ? item.items : [];
+
+                        return (
+                            <li key={i}>
+                                <span dangerouslySetInnerHTML={{ __html: content }} />
+                                {nestedItems.length > 0 && (
+                                    <BlockRenderer
+                                        block={{
+                                            type: 'list',
+                                            data: {
+                                                style: data.style,
+                                                items: nestedItems
+                                            }
+                                        }}
+                                    />
+                                )}
+                            </li>
+                        );
+                    })}
                 </ListTag>
             );
 
