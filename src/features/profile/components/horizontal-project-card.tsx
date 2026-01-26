@@ -34,6 +34,9 @@ export function HorizontalProjectCard({ project }: HorizontalProjectCardProps) {
                                 src={project.coverImage}
                                 alt={project.title}
                                 className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                                width="400"
+                                height="225"
                             />
                         ) : (
                             <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">

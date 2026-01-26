@@ -269,7 +269,7 @@ function ImagePreview({ fileId, fileName }: { fileId: string; fileName: string }
 
     return (
         <div className="flex items-center justify-center h-full p-4">
-            <img src={url} alt={fileName} className="max-w-full max-h-full object-contain" />
+            <img src={url} alt={fileName} className="max-w-full max-h-full object-contain" loading="lazy" width="800" height="600" />
         </div>
     );
 }

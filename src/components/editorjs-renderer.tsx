@@ -142,6 +142,8 @@ function BlockRenderer({ block }: { block: EditorJsBlock }) {
                         alt={data.caption || 'Image'}
                         className="rounded-lg max-h-[500px] w-full object-contain bg-muted"
                         loading="lazy"
+                        width="800"
+                        height="500"
                     />
                     {data.caption && (
                         <figcaption className="text-center text-xs text-muted-foreground mt-2">

@@ -22,6 +22,9 @@ export function ProjectCard({ project, showKeyBadge = false }: ProjectCardProps)
                             src={project.coverImage}
                             alt={project.title}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                            width="400"
+                            height="225"
                         />
                     ) : (
                         <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">

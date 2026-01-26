@@ -31,6 +31,8 @@ export function ProfileHeader({
                         src={user.bannerImage}
                         alt="Profile banner"
                         className="w-full h-full object-cover"
+                        loading="eager"
+                        fetchPriority="high"
                     />
                 ) : (
                     <div className="w-full h-full bg-gradient-to-r from-primary/80 to-primary" />
@@ -50,6 +52,10 @@ export function ProfileHeader({
                             }
                             alt={user.username}
                             className="w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover border-4 border-background shadow-lg"
+                            loading="eager"
+                            fetchPriority="high"
+                            width="128"
+                            height="128"
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.onerror = null;
