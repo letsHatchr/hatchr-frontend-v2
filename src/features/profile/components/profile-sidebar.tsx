@@ -150,7 +150,7 @@ export function ProfileSidebar({
                     <div className="bg-primary/10 rounded-lg p-3 mb-4">
                         <h4 className="text-sm font-semibold text-primary mb-2 pl-1">Achievements</h4>
                         <ul className="list-disc pl-5 space-y-1">
-                            {user.achievements.slice(0, 3).map((achievement) => (
+                            {user.achievements.map((achievement) => (
                                 <li key={achievement._id} className="text-xs text-left">
                                     {achievement.title}
                                 </li>
