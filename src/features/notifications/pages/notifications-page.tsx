@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { useNotifications, useMarkAllRead, useMarkRead, useUnreadCount } from '../hooks/use-notifications';
+import { useNotifications, useMarkAllRead, useMarkRead, useUnreadCount, useClearAll } from '../hooks/use-notifications';
 import { NotificationFilters, type NotificationFilter } from '../components/notification-filters';
 import { NotificationItem } from '../components/notification-item';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, Check, Bell, Inbox, PartyPopper, BellOff } from 'lucide-react';
+import { Loader2, Check, Bell, Inbox, PartyPopper, BellOff, Trash2 } from 'lucide-react';
 import { useAcceptInvitation, useDeclineInvitation, useMyInvitations } from '@/features/project/hooks/use-project';
 import { toast } from 'sonner';
 import type { Notification } from '../types';
@@ -150,6 +150,7 @@ export function NotificationsPage() {
     const { data: unreadCount = 0 } = useUnreadCount();
     const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllRead();
     const { mutate: markRead } = useMarkRead();
+    const { mutate: clearAll, isPending: isClearing } = useClearAll();
 
     const { ref, inView } = useInView();
 
@@ -201,6 +202,12 @@ export function NotificationsPage() {
         toast.success('All notifications marked as read');
     };
 
+    const handleClearAll = () => {
+        if (!window.confirm('Are you sure you want to delete ALL notifications? This cannot be undone.')) return;
+        clearAll();
+        toast.success('All notifications cleared');
+    };
+
     const handleNotificationClick = (notification: Notification) => {
         if (!notification.isRead) {
             markRead(notification._id);
@@ -236,22 +243,40 @@ export function NotificationsPage() {
                             Stay updated with your activity
                         </p>
                     </div>
-                    {hasUnread && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleMarkAllRead}
-                            disabled={isMarkingAll}
-                            className="gap-2"
-                        >
-                            {isMarkingAll ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Check className="h-4 w-4" />
-                            )}
-                            Mark all read
-                        </Button>
-                    )}
+                    <div className="flex gap-2">
+                        {hasUnread && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleMarkAllRead}
+                                disabled={isMarkingAll}
+                                className="gap-2"
+                            >
+                                {isMarkingAll ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Check className="h-4 w-4" />
+                                )}
+                                Mark all read
+                            </Button>
+                        )}
+                        {allNotifications.length > 0 && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleClearAll}
+                                disabled={isClearing}
+                                className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                                {isClearing ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                )}
+                                Clear all
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Filter Tabs */}

@@ -69,3 +69,17 @@ export function useMarkAllRead() {
         },
     });
 }
+
+export function useClearAll() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const { data } = await api.delete('/notifications/all');
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+        },
+    });
+}
