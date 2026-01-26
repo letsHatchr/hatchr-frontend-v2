@@ -1,12 +1,4 @@
-
-'use client';
-
-/**
- * FilesList Component
- * Display project files with download, view, and delete functionality
- */
-
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Download, Trash2, Loader2, AlertCircle, File, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -16,7 +8,6 @@ import { UserAvatar } from '@/components/user-avatar';
 import { useAuthStore } from '@/store';
 import { toast } from '@/lib/toast';
 import { useProjectFiles, useDownloadFile, useDeleteFile } from '../hooks/use-files';
-import { FilePreviewModal } from '@/components/file-preview-modal';
 import {
     getFileIcon,
     formatFileSize,
@@ -24,6 +15,9 @@ import {
     getFileCategory,
     getCategoryColor,
 } from '../utils/file-helpers';
+
+// Lazy load the modal to avoid loading syntax highlighter on initial page load
+const FilePreviewModal = lazy(() => import('@/components/file-preview-modal').then(module => ({ default: module.FilePreviewModal })));
 
 interface FilesListProps {
     projectId: string;
@@ -278,11 +272,15 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                 </div>
             )}
 
-            <FilePreviewModal
-                open={!!previewFile}
-                onOpenChange={(open) => !open && setPreviewFile(null)}
-                file={previewFile}
-            />
+            <Suspense fallback={null}>
+                {previewFile && (
+                    <FilePreviewModal
+                        open={!!previewFile}
+                        onOpenChange={(open) => !open && setPreviewFile(null)}
+                        file={previewFile}
+                    />
+                )}
+            </Suspense>
         </Card>
     );
 }
