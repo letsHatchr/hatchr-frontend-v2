@@ -3,6 +3,7 @@
 import { Eye, ArrowBigUp, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import type { Project } from '../types';
 
 interface HorizontalProjectCardProps {
@@ -31,7 +32,7 @@ export function HorizontalProjectCard({ project }: HorizontalProjectCardProps) {
 
                         {project.coverImage ? (
                             <img
-                                src={project.coverImage}
+                                src={optimizeCloudinaryUrl(project.coverImage, { width: 400, height: 225 })}
                                 alt={project.title}
                                 className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 loading="lazy"

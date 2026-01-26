@@ -4,6 +4,7 @@ import { Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { UserAvatar } from '@/components/user-avatar';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import type { Project } from '../types';
 
 interface ProjectCardProps {
@@ -19,7 +20,7 @@ export function ProjectCard({ project, showKeyBadge = false }: ProjectCardProps)
                 <AspectRatio ratio={16 / 9}>
                     {project.coverImage ? (
                         <img
-                            src={project.coverImage}
+                            src={optimizeCloudinaryUrl(project.coverImage, { width: 400, height: 225 })}
                             alt={project.title}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"

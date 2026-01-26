@@ -3,6 +3,7 @@
 import { Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import type { User as UserType } from '../types';
 
 interface ProfileHeaderProps {
@@ -28,7 +29,7 @@ export function ProfileHeader({
             <div className="h-32 lg:h-40 relative">
                 {user.bannerImage ? (
                     <img
-                        src={user.bannerImage}
+                        src={optimizeCloudinaryUrl(user.bannerImage, { width: 1200, height: 400 })}
                         alt="Profile banner"
                         className="w-full h-full object-cover"
                         loading="eager"
@@ -47,7 +48,7 @@ export function ProfileHeader({
                         <img
                             src={
                                 user.avatar && user.avatar.trim() !== ''
-                                    ? user.avatar
+                                    ? optimizeCloudinaryUrl(user.avatar, { width: 200, height: 200 })
                                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username)}&size=128&background=F5973F&color=fff`
                             }
                             alt={user.username}

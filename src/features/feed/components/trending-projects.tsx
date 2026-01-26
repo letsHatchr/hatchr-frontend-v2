@@ -4,6 +4,7 @@ import { TrendingUp, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTrendingProjects } from '../hooks/use-sidebar';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 
 export function TrendingProjects() {
     const { data, isLoading, isError } = useTrendingProjects(5);
@@ -54,7 +55,7 @@ export function TrendingProjects() {
                                 {/* Project Image */}
                                 {project.coverImage ? (
                                     <img
-                                        src={project.coverImage}
+                                        src={optimizeCloudinaryUrl(project.coverImage, { width: 100, height: 100 })}
                                         alt={project.title}
                                         className="h-10 w-10 rounded-lg object-cover flex-shrink-0 border border-border/50"
                                     />
