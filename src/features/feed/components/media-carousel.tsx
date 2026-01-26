@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AutoplayVideo } from './autoplay-video';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 
 interface MediaItem {
     type: 'image' | 'video';
@@ -81,8 +82,10 @@ export function MediaCarousel({ media, className }: MediaCarouselProps) {
                 <div className="absolute inset-0 overflow-hidden">
                     {currentMedia.type === 'image' && (
                         <div
-                            className="absolute inset-0 bg-center bg-cover blur-xl scale-110 opacity-50 transition-all duration-500"
-                            style={{ backgroundImage: `url(${currentMedia.url})` }}
+                            className="absolute inset-0 bg-center bg-cover blur-3xl scale-110 opacity-50 transition-all duration-500"
+                            style={{
+                                backgroundImage: `url(${optimizeCloudinaryUrl(currentMedia.url, { width: 100, blur: 1000, quality: 'auto' })})`
+                            }}
                         />
                     )}
                     {currentMedia.type === 'video' && (
@@ -94,7 +97,7 @@ export function MediaCarousel({ media, className }: MediaCarouselProps) {
                 <div className="relative z-10 w-full h-full flex items-center justify-center select-none">
                     {currentMedia.type === 'image' ? (
                         <img
-                            src={currentMedia.url}
+                            src={optimizeCloudinaryUrl(currentMedia.url, { width: 1080, quality: 'auto:best' })}
                             alt={`Media ${currentIndex + 1}`}
                             className="h-full w-auto max-w-full object-contain pointer-events-none"
                             loading="lazy"
