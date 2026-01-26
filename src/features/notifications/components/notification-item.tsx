@@ -143,7 +143,7 @@ function getNotificationLink(notification: Notification): string {
         case 'COMMENT_REPLY':
             return relatedEntity?.slug ? `/post/${relatedEntity.slug}` : '#';
         case 'NEW_FOLLOWER':
-            return `/${actor.username}`;
+            return actor?.username ? `/${actor.username}` : '#';
         case 'PROJECT_INVITATION':
             return '/notifications';
         case 'PROJECT_JOIN':
@@ -231,27 +231,39 @@ export const NotificationItem = memo(function NotificationItem({
                     <div className="flex-1 min-w-0">
                         {/* Header with avatar and time */}
                         <div className="flex items-center gap-2 mb-1.5">
-                            <a
-                                href={`/${notification.actor.username}`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex-shrink-0 hover:opacity-80 transition-opacity"
-                            >
-                                <UserAvatar
-                                    src={notification.actor.avatar}
-                                    name={notification.actor.name}
-                                    username={notification.actor.username}
-                                    size="sm"
-                                    className="ring-2 ring-background"
-                                />
-                            </a>
-                            <div className="flex-1 min-w-0">
+                            {notification.actor ? (
                                 <a
                                     href={`/${notification.actor.username}`}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                                    className="flex-shrink-0 hover:opacity-80 transition-opacity"
                                 >
-                                    {notification.actor.name}
+                                    <UserAvatar
+                                        src={notification.actor.avatar}
+                                        name={notification.actor.name}
+                                        username={notification.actor.username}
+                                        size="sm"
+                                        className="ring-2 ring-background"
+                                    />
                                 </a>
+                            ) : (
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                                    <span className="text-xs text-muted-foreground">?</span>
+                                </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                                {notification.actor ? (
+                                    <a
+                                        href={`/${notification.actor.username}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                                    >
+                                        {notification.actor.name}
+                                    </a>
+                                ) : (
+                                    <span className="font-semibold text-sm text-muted-foreground">
+                                        Deleted User
+                                    </span>
+                                )}
                             </div>
                             <span className="text-xs text-muted-foreground flex-shrink-0">
                                 {timeAgo}
