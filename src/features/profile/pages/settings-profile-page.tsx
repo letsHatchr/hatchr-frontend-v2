@@ -305,7 +305,7 @@ export function SettingsProfilePage() {
                                                     <Textarea
                                                         id="about"
                                                         {...register('about')}
-                                                        placeholder="Tell your story..."
+                                                        placeholder="On a journey to create something amazing on Hatchr..."
                                                         className="resize-none min-h-[200px]"
                                                     />
                                                     <p className="text-xs text-muted-foreground">Detailed description appearing in the main profile area.</p>

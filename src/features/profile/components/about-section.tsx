@@ -16,7 +16,7 @@ export function AboutSection({ about, name }: AboutSectionProps) {
             </CardHeader>
             <CardContent>
                 <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {about || `I am ${name || 'a user'}, Nothing much to know about me`}
+                    {about || 'On a journey to create something amazing on Hatchr...'}
                 </p>
             </CardContent>
         </Card>
