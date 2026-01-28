@@ -270,7 +270,13 @@ export function TiptapEditor({
                 },
             }),
         ],
-        content: content ? JSON.parse(content) : undefined,
+        content: content ? (() => {
+            try {
+                return JSON.parse(content);
+            } catch {
+                return content;
+            }
+        })() : undefined,
         editable,
         onUpdate: ({ editor }) => {
             const json = JSON.stringify(editor.getJSON());
@@ -298,12 +304,18 @@ export function TiptapEditor({
     useEffect(() => {
         if (editor && content) {
             try {
+                // Try strictly parsing as JSON first
                 const parsed = JSON.parse(content);
+                // Check if the parsed content is different from current editor state
                 if (JSON.stringify(editor.getJSON()) !== JSON.stringify(parsed)) {
                     editor.commands.setContent(parsed);
                 }
             } catch (e) {
-                // Content is not valid JSON, ignore
+                // If JSON parsing fails, treat it as HTML
+                // Only update if content is different to prevent cursor jumps/loops
+                if (editor.getHTML() !== content) {
+                    editor.commands.setContent(content);
+                }
             }
         }
     }, [content, editor]);

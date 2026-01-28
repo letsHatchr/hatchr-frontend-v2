@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, FileText, Plus } from 'lucide-react';
+import { Loader2, FileText, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PostCard } from '@/features/feed/components/post-card';
 import { useProjectPosts } from '../hooks/use-project';
@@ -70,9 +70,9 @@ export function ProjectTimeline({
                     This project doesn't have any updates posted yet.
                 </p>
                 {isTeamMember && onAddUpdate && (
-                    <Button onClick={onAddUpdate}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add First Update
+                    <Button onClick={onAddUpdate} className="bg-orange-500 hover:bg-orange-600 text-white border-0">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Hatch Project
                     </Button>
                 )}
             </Card>

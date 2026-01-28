@@ -23,16 +23,16 @@ type FeedTab = 'forYou' | 'following';
 type SortOption = 'new' | 'rising' | 'upvotes' | 'best';
 
 const sortOptions: { value: SortOption; label: string }[] = [
+    { value: 'rising', label: 'Rising' },
     { value: 'best', label: 'Best' },
     { value: 'new', label: 'New' },
-    { value: 'rising', label: 'Rising' },
     { value: 'upvotes', label: 'Top' },
 ];
 
 export function FeedPage() {
     const { isAuthenticated } = useAuthStore();
     const [activeTab, setActiveTab] = useState<FeedTab>('forYou');
-    const [sortBy, setSortBy] = useState<SortOption>('best');
+    const [sortBy, setSortBy] = useState<SortOption>('rising');
 
     const feedParams: FeedParams = {
         type: activeTab,

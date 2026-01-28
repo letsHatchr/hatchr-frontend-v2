@@ -1,11 +1,10 @@
-import { useParams, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useParams, useNavigate, useSearch, useLocation } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Plus, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import { toast } from '@/lib/toast';
-import { useSearch } from '@tanstack/react-router';
 import {
     useProject,
     useWatchProject,
@@ -22,6 +21,9 @@ export function ProjectPage() {
     const { slug } = useParams({ strict: false });
     const search = useSearch({ from: '/project/$slug' });
     const navigate = useNavigate();
+    const location = useLocation();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const state = location.state as any;
     const { user: currentUser, openLoginModal } = useAuthStore();
 
     const { data: project, isLoading, isError } = useProject(slug as string);
@@ -29,6 +31,13 @@ export function ProjectPage() {
     const unwatchMutation = useUnwatchProject();
 
     const [showPostModal, setShowPostModal] = useState(false);
+
+    // Auto-open create post modal if coming from "Hatch Project" flow
+    useEffect(() => {
+        if (state?.startHatching) {
+            setShowPostModal(true);
+        }
+    }, [state]);
 
     if (isLoading) {
         return (
@@ -211,6 +220,7 @@ export function ProjectPage() {
                     onOpenChange={setShowPostModal}
                     projectId={project._id}
                     projectSlug={slug as string}
+                    postCount={project.posts?.length || 0}
                 />
             )}
         </div>
