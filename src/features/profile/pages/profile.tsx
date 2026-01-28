@@ -199,7 +199,7 @@ export function ProfilePage() {
                     {/* Right Content */}
                     <main className="space-y-6">
                         {/* About Section */}
-                        <AboutSection about={user.about} name={user.name} />
+                        <AboutSection about={user.about} />
 
                         {/* Projects Section */}
                         <section>
