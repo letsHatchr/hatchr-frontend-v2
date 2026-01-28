@@ -5,10 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 interface AboutSectionProps {
     about?: string;
     bio?: string;
-    name?: string;
 }
 
-export function AboutSection({ about, name }: AboutSectionProps) {
+export function AboutSection({ about }: AboutSectionProps) {
     return (
         <Card className="gap-1">
             <CardHeader>
