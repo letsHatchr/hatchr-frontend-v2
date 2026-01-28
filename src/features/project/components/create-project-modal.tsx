@@ -136,7 +136,7 @@ export function CreateProjectModal({ open, onOpenChange, project }: CreateProjec
                 setPreviewUrl(null);
 
                 if (res.project?.slug) {
-                    navigate({ to: `/project/${res.project.slug}`, state: { startHatching: true } });
+                    navigate({ to: `/project/${res.project.slug}`, search: { startHatching: 'true' } });
                 }
             }
         } catch (error) {

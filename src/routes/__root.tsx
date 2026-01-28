@@ -134,8 +134,9 @@ const projectRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/project/$slug',
     component: ProjectPage,
-    validateSearch: (search: Record<string, unknown>) => ({
+    validateSearch: (search: Record<string, unknown>): { tab: string; startHatching?: string } => ({
         tab: (search.tab as string) || 'timeline',
+        ...(search.startHatching ? { startHatching: search.startHatching as string } : {}),
     }),
 });
 
