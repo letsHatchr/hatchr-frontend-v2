@@ -98,7 +98,7 @@ export function FeedPage() {
                     <Tabs
                         value={activeTab}
                         onValueChange={(v) => setActiveTab(v as FeedTab)}
-                        className="mb-4 hidden sm:block"
+                        className="hidden sm:block"
                     >
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="forYou">For You</TabsTrigger>
@@ -131,7 +131,7 @@ export function FeedPage() {
                     <MobileDiscoverCards />
 
                     {/* Sort Pills */}
-                    <div className="flex items-center gap-2 mt-3 mb-2 sm:mb-6 overflow-x-auto pb-2 px-3 sm:px-0">
+                    <div className="flex items-center gap-2 py-3 sm:py-4 overflow-x-auto px-3 sm:px-0">
                         {sortOptions.map((option) => (
                             <Button
                                 key={option.value}

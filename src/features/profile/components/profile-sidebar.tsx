@@ -1,10 +1,43 @@
 'use client';
 
-import { GraduationCap, School } from 'lucide-react';
+import { useState } from 'react';
+
+import { GraduationCap, School, Egg, Rocket, Star, Flame, Zap, Crown, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { SocialLinks } from './social-links';
 import type { User as UserType } from '../types';
+
+// Rank definitions based on hatch points
+const RANKS = [
+    { minPoints: 0, title: 'Hatchling', icon: Egg, color: 'text-amber-600', bgColor: 'bg-amber-600/20', borderColor: 'border-amber-600/30' },
+    { minPoints: 50, title: 'Novice', icon: Rocket, color: 'text-green-500', bgColor: 'bg-green-500/20', borderColor: 'border-green-500/30' },
+    { minPoints: 150, title: 'Builder', icon: Zap, color: 'text-blue-500', bgColor: 'bg-blue-500/20', borderColor: 'border-blue-500/30' },
+    { minPoints: 400, title: 'Ascender', icon: Star, color: 'text-purple-500', bgColor: 'bg-purple-500/20', borderColor: 'border-purple-500/30' },
+    { minPoints: 800, title: 'Innovator', icon: Flame, color: 'text-orange-500', bgColor: 'bg-orange-500/20', borderColor: 'border-orange-500/30' },
+    { minPoints: 1500, title: 'Pioneer', icon: Crown, color: 'text-pink-500', bgColor: 'bg-pink-500/20', borderColor: 'border-pink-500/30' },
+    { minPoints: 3000, title: 'Visionary', icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-500/20', borderColor: 'border-yellow-500/30' },
+    { minPoints: 6000, title: 'Legend', icon: Crown, color: 'text-primary', bgColor: 'bg-primary/20', borderColor: 'border-primary/30' },
+];
+
+function getRank(points: number) {
+    let rank = RANKS[0];
+    let level = 1;
+    for (let i = RANKS.length - 1; i >= 0; i--) {
+        if (points >= RANKS[i].minPoints) {
+            rank = RANKS[i];
+            level = i + 1;
+            break;
+        }
+    }
+    // Calculate progress to next level
+    const currentIdx = RANKS.findIndex(r => r.title === rank.title);
+    const nextRank = RANKS[currentIdx + 1];
+    const progress = nextRank
+        ? ((points - rank.minPoints) / (nextRank.minPoints - rank.minPoints)) * 100
+        : 100;
+    return { ...rank, level, progress: Math.min(progress, 100) };
+}
 
 interface ProfileSidebarProps {
     user: UserType;
@@ -29,6 +62,11 @@ export function ProfileSidebar({
     onFollowersClick,
     onFollowingClick,
 }: ProfileSidebarProps) {
+    const hatchPoints = user.hatchPoints || 0;
+    const rankInfo = getRank(hatchPoints);
+    const RankIcon = rankInfo.icon;
+    const [achievementsExpanded, setAchievementsExpanded] = useState(false);
+
     return (
         <Card className="overflow-hidden pt-0">
             {/* Banner */}
@@ -73,19 +111,53 @@ export function ProfileSidebar({
                     </div>
                 </div>
 
-                {/* Stats Row - Compact */}
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div className="bg-primary/10 rounded-lg p-2 text-center">
-                        <div className="text-xs font-semibold text-primary">Projects</div>
-                        <div className="text-lg font-bold">{projectsCount}</div>
-                    </div>
-                    <div className="bg-primary/10 rounded-lg p-2 text-center">
-                        <div className="text-xs font-semibold text-primary">Hatch points</div>
-                        <div className="text-lg font-bold">{user.hatchPoints || 0}</div>
+                {/* Rank & Stats Card - 2 Columns */}
+                <div className="rounded-lg p-3 mb-3 border border-border bg-muted/30">
+                    <div className="flex items-center">
+                        {/* Rank Column */}
+                        <div className="flex items-center gap-2.5 flex-1">
+                            {/* Icon with Progress Ring */}
+                            <div className="relative w-10 h-10 shrink-0">
+                                <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
+                                    <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-muted" />
+                                    <circle
+                                        cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="2.5"
+                                        className={rankInfo.color}
+                                        strokeDasharray={`${rankInfo.progress} 100`}
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <RankIcon className={`w-4 h-4 ${rankInfo.color}`} />
+                                </div>
+                            </div>
+
+                            {/* Rank Info */}
+                            <div className="min-w-0">
+                                <div className={`text-sm font-semibold ${rankInfo.color}`}>{rankInfo.title}</div>
+                                <div className="text-[10px] text-muted-foreground">{hatchPoints} HP</div>
+                            </div>
+                        </div>
+
+                        {/* Projects Column */}
+                        <div className="flex items-center gap-2.5">
+                            {/* Projects Label */}
+                            <div className="text-sm font-semibold">Projects</div>
+
+                            {/* Circle with Number */}
+                            <div className="relative w-10 h-10 shrink-0">
+                                <svg className="w-10 h-10" viewBox="0 0 36 36">
+                                    <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-muted" />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-sm font-bold">{projectsCount}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Following/Followers - improved touch targets */}
+                {/* Following/Followers - Original compact style */}
                 <div className="flex items-center justify-center gap-3 text-sm mb-4">
                     <button
                         onClick={onFollowingClick}
@@ -120,17 +192,17 @@ export function ProfileSidebar({
                     </div>
                 )}
 
-                {/* Interest Tags */}
+                {/* Interest Tags - Professional pill badges */}
                 {user.interests && user.interests.length > 0 && (
-                    <div className="bg-primary/10 rounded-lg p-3 mb-4 text-center">
-                        <div className="flex flex-wrap justify-center gap-2">
-                            {user.interests.map((interest, idx) => (
-                                <span key={idx} className="text-sm text-foreground">
-                                    {interest}
-                                    {idx < user.interests!.length - 1 && <span className="text-muted-foreground ml-2">|</span>}
-                                </span>
-                            ))}
-                        </div>
+                    <div className="flex flex-wrap justify-center gap-1.5 mb-4">
+                        {user.interests.map((interest, idx) => (
+                            <span
+                                key={idx}
+                                className="px-2.5 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20"
+                            >
+                                {interest}
+                            </span>
+                        ))}
                     </div>
                 )}
 
@@ -145,11 +217,50 @@ export function ProfileSidebar({
                     </div>
                 </div>
 
-                {/* Achievements */}
+                {/* Experience - Timeline Style */}
+                {user.experience && user.experience.length > 0 && (
+                    <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-primary mb-3 px-1">Experience</h4>
+                        <div className="relative pl-4 border-l-2 border-primary/30 space-y-3">
+                            {user.experience.map((exp, idx) => (
+                                <div key={exp._id || idx} className="relative">
+                                    {/* Timeline dot */}
+                                    <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+
+                                    <div className="text-sm">
+                                        <div className="font-medium">{exp.role}</div>
+                                        <div className="text-muted-foreground text-xs">{exp.company}</div>
+                                        <div className="text-muted-foreground text-[10px] mt-0.5">
+                                            {exp.startDate} — {exp.isCurrent ? 'Present' : exp.endDate}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Achievements - Collapsible on mobile */}
                 {user.achievements && user.achievements.length > 0 && (
                     <div className="bg-primary/10 rounded-lg p-3 mb-4">
-                        <h4 className="text-sm font-semibold text-primary mb-2 pl-1">Achievements</h4>
-                        <ul className="list-disc pl-5 space-y-1">
+                        <button
+                            className="w-full flex items-center justify-between sm:cursor-default"
+                            onClick={() => setAchievementsExpanded(!achievementsExpanded)}
+                        >
+                            <h4 className="text-sm font-semibold text-primary">
+                                Achievements
+                                <span className="text-xs font-normal text-muted-foreground ml-1 sm:hidden">
+                                    ({user.achievements.length})
+                                </span>
+                            </h4>
+                            <svg
+                                className={`w-4 h-4 text-muted-foreground transition-transform sm:hidden ${achievementsExpanded ? 'rotate-180' : ''}`}
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <ul className={`list-disc pl-5 space-y-1 mt-2 ${achievementsExpanded ? 'block' : 'hidden sm:block'}`}>
                             {user.achievements.map((achievement) => (
                                 <li key={achievement._id} className="text-xs text-left">
                                     {achievement.title}

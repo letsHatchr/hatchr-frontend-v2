@@ -21,6 +21,7 @@ export interface User {
     school?: string;
     interests?: string[]; // Tags like AI/ML, IoT, Robotics, Backend
     achievements?: Achievement[];
+    experience?: Experience[];
     createdAt: string;
     updatedAt: string;
 }
@@ -32,6 +33,16 @@ export interface Achievement {
     icon?: string;
     earnedAt?: string;
     link?: string;
+}
+
+export interface Experience {
+    _id?: string;
+    company: string;
+    role: string;
+    startDate: string;
+    endDate?: string;
+    isCurrent?: boolean;
+    description?: string;
 }
 
 export interface SocialLinks {

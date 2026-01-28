@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/lib/toast';
 import { useUserUpdate, useUserProfile, useUploadAvatar, useUploadBanner } from '../hooks/use-user';
 import { useAuthStore } from '@/store';
-import { Plus, Trash2, Save, ArrowLeft, Camera, Image as ImageIcon, Loader2, User, Mail } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Camera, Image as ImageIcon, Loader2, User, Mail, Briefcase } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from '@tanstack/react-router';
 import { EmailNotificationsSettings } from '../components/settings/email-notifications-settings';
@@ -31,6 +31,7 @@ interface ProfileFormValues {
     };
     interests: string;
     achievements: { title: string }[];
+    experience: { company: string; role: string; startDate: string; endDate: string; isCurrent: boolean }[];
 }
 
 type SettingsSection = 'profile' | 'email';
@@ -48,15 +49,21 @@ export function SettingsProfilePage() {
 
     const user = profileData?.user;
 
-    const { register, control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<ProfileFormValues>({
+    const { register, control, handleSubmit, reset, watch, formState: { errors, isDirty } } = useForm<ProfileFormValues>({
         defaultValues: {
-            achievements: []
+            achievements: [],
+            experience: []
         }
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields: achievementFields, append: appendAchievement, remove: removeAchievement } = useFieldArray({
         control,
         name: "achievements"
+    });
+
+    const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
+        control,
+        name: "experience"
     });
 
     useEffect(() => {
@@ -77,6 +84,13 @@ export function SettingsProfilePage() {
                 },
                 interests: user.interests?.join(', ') || '',
                 achievements: user.achievements?.map(a => ({ title: a.title })) || [],
+                experience: user.experience?.map(e => ({
+                    company: e.company || '',
+                    role: e.role || '',
+                    startDate: e.startDate || '',
+                    endDate: e.endDate || '',
+                    isCurrent: e.isCurrent || false
+                })) || [],
             });
         }
     }, [user, reset]);
@@ -89,6 +103,7 @@ export function SettingsProfilePage() {
                 ...data,
                 interests: data.interests.split(',').map(i => i.trim()).filter(Boolean),
                 achievements: data.achievements.filter(a => a.title.trim() !== ''),
+                experience: data.experience.filter(e => e.company.trim() !== '' && e.role.trim() !== ''),
             };
 
             await updateMutation.mutateAsync({
@@ -103,11 +118,11 @@ export function SettingsProfilePage() {
     };
 
     const addAchievement = () => {
-        append({ title: '' });
+        appendAchievement({ title: '' });
     };
 
-    const removeAchievement = (index: number) => {
-        remove(index);
+    const addExperience = () => {
+        appendExperience({ company: '', role: '', startDate: '', endDate: '', isCurrent: false });
     };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
@@ -363,6 +378,88 @@ export function SettingsProfilePage() {
                                                     <p className="text-xs text-muted-foreground">These will appear as tags on your profile.</p>
                                                 </div>
 
+
+                                                {/* Experience Section */}
+                                                <div className="space-y-4 pt-4 border-t">
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <Label className="text-base">Experience</Label>
+                                                            <p className="text-xs text-muted-foreground">Add your work experience</p>
+                                                        </div>
+                                                        <Button type="button" variant="outline" size="sm" onClick={addExperience}>
+                                                            <Plus className="h-4 w-4 mr-1" /> Add
+                                                        </Button>
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        {experienceFields.map((field, index) => (
+                                                            <div key={field.id} className="p-4 border rounded-lg bg-muted/30 space-y-3">
+                                                                <div className="flex justify-between items-start">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Briefcase className="h-4 w-4 text-muted-foreground" />
+                                                                        <span className="text-sm font-medium">Experience {index + 1}</span>
+                                                                    </div>
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => removeExperience(index)}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                                                    </Button>
+                                                                </div>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                    <div className="space-y-1">
+                                                                        <Label className="text-xs">Company</Label>
+                                                                        <Input
+                                                                            {...register(`experience.${index}.company`)}
+                                                                            placeholder="e.g. Google"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <Label className="text-xs">Role</Label>
+                                                                        <Input
+                                                                            {...register(`experience.${index}.role`)}
+                                                                            placeholder="e.g. SDE Intern"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <Label className="text-xs">Start Date</Label>
+                                                                        <Input
+                                                                            {...register(`experience.${index}.startDate`)}
+                                                                            placeholder="e.g. Jan 2024"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <Label className="text-xs">End Date</Label>
+                                                                        <Input
+                                                                            {...register(`experience.${index}.endDate`)}
+                                                                            placeholder="e.g. Present"
+                                                                            disabled={watch(`experience.${index}.isCurrent`)}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        id={`exp-current-${index}`}
+                                                                        {...register(`experience.${index}.isCurrent`)}
+                                                                        className="rounded border-input"
+                                                                    />
+                                                                    <Label htmlFor={`exp-current-${index}`} className="text-xs font-normal cursor-pointer">
+                                                                        I currently work here
+                                                                    </Label>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        {experienceFields.length === 0 && (
+                                                            <div className="text-sm text-muted-foreground text-center py-6 border border-dashed rounded-md bg-muted/50">
+                                                                No experience added yet.
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
                                                 <div className="space-y-4 pt-4 border-t">
                                                     <div className="flex items-center justify-between">
                                                         <Label className="text-base">Achievements</Label>
@@ -372,7 +469,7 @@ export function SettingsProfilePage() {
                                                     </div>
 
                                                     <div className="space-y-3">
-                                                        {fields.map((field, index) => (
+                                                        {achievementFields.map((field, index) => (
                                                             <div key={field.id} className="flex gap-2">
                                                                 <Input
                                                                     {...register(`achievements.${index}.title`)}
@@ -388,7 +485,7 @@ export function SettingsProfilePage() {
                                                                 </Button>
                                                             </div>
                                                         ))}
-                                                        {fields.length === 0 && (
+                                                        {achievementFields.length === 0 && (
                                                             <div className="text-sm text-muted-foreground text-center py-6 border border-dashed rounded-md bg-muted/50">
                                                                 No achievements added yet.
                                                             </div>
