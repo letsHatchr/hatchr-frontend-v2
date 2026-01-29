@@ -80,9 +80,8 @@ export function ProjectSidebar({
     return (
         <aside className="w-full space-y-3 lg:space-y-5">
             {/* Project Title */}
-            {/* Project Title */}
             <div>
-                <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
+                <h1 className="text-lg font-bold leading-tight">{project.title}</h1>
             </div>
 
             {/* Team Section - Owner + Partners */}
@@ -200,7 +199,7 @@ export function ProjectSidebar({
                                         >
                                             {getFileIcon(file.fileType)}
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm truncate group-hover:text-primary transition-colors">{file.originalFileName}</p>
+                                                <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">{file.originalFileName}</p>
                                                 <p className="text-xs text-muted-foreground">{formatFileSize(file.fileSize)}</p>
                                             </div>
 

@@ -18,6 +18,7 @@ import {
     useUnfollowUser,
 } from '../hooks/use-user';
 import { useReorderProjects } from '../hooks/use-reorder-projects';
+import { SeoHead } from '@/components/seo-head';
 import type { Project } from '../types';
 
 export function ProfilePage() {
@@ -178,6 +179,15 @@ export function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-background pb-24 lg:pb-0">
+            {/* SEO Meta Tags */}
+            <SeoHead
+                title={user.name || user.username}
+                description={user.bio || `Check out ${user.name || user.username}'s profile on Hatchr`}
+                image={user.avatar}
+                url={`${window.location.origin}/${user.username}`}
+                type="profile"
+            />
+
             {/* Main Content */}
             <div className="max-w-6xl mx-auto px-4 py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-6">

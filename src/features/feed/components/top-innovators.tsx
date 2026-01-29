@@ -60,7 +60,7 @@ export function TopInnovators() {
                             />
 
                             {/* Info */}
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 max-w-[120px]">
                                 <p className="text-sm font-medium truncate">{user.name}</p>
                                 <p className="text-xs text-muted-foreground truncate">
                                     @{user.username}
@@ -68,7 +68,7 @@ export function TopInnovators() {
                             </div>
 
                             {/* Points */}
-                            <span className="text-xs font-medium text-primary">
+                            <span className="text-xs font-medium text-primary shrink-0 ml-auto">
                                 {user.hatchPoints?.toLocaleString() ?? 0} pts
                             </span>
                         </a>

@@ -2,7 +2,7 @@ import { useParams, useNavigate, useSearch, useLocation } from '@tanstack/react-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Plus, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, AlertCircle, Share2 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import { toast } from '@/lib/toast';
 import {
@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { generateHTML } from '@tiptap/html';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import { SeoHead } from '@/components/seo-head';
+import { ShareModal } from '@/components/share-modal';
 
 // Helper function to render description (handles both Tiptap JSON and plain HTML/text)
 const renderDescription = (description: string | undefined): string => {
@@ -53,6 +55,7 @@ export function ProjectPage() {
     const unwatchMutation = useUnwatchProject();
 
     const [showPostModal, setShowPostModal] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     // Auto-open create post modal if coming from "Hatch Project" flow
     useEffect(() => {
@@ -123,7 +126,16 @@ export function ProjectPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 pb-24 lg:pb-8 max-w-7xl">
+        <div className="container mx-auto px-4 py-8 pb-24 lg:pb-8 max-w-7xl overflow-x-hidden">
+            {/* SEO Meta Tags */}
+            <SeoHead
+                title={project.title}
+                description={project.description?.slice(0, 160) || `Check out ${project.title} on Hatchr`}
+                image={project.coverImage}
+                url={`${window.location.origin}/project/${project.slug || project._id}`}
+                type="article"
+            />
+
             {/* Cover Image - Mobile: Top of page */}
             {project.coverImage && (
                 <div className="lg:hidden relative h-40 -mx-4 -mt-8 mb-6 w-[calc(100%+2rem)] overflow-hidden">
@@ -132,6 +144,14 @@ export function ProjectPage() {
                         alt={project.title}
                         className="w-full h-full object-cover"
                     />
+                    {/* Floating Share Button */}
+                    <button
+                        onClick={() => setShowShareModal(true)}
+                        className="absolute top-3 right-3 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all hover:scale-105 active:scale-95 group"
+                        title="Share Project"
+                    >
+                        <Share2 className="h-4 w-4 text-white/90 group-hover:text-white" />
+                    </button>
                 </div>
             )}
 
@@ -152,12 +172,20 @@ export function ProjectPage() {
                 <main className="flex-1 min-w-0">
                     {/* Cover Image - Desktop: In main content area */}
                     {project.coverImage && (
-                        <div className="hidden lg:block relative h-48 mb-6 w-full overflow-hidden">
+                        <div className="hidden lg:block relative h-48 mb-6 w-full overflow-hidden rounded-lg">
                             <img
                                 src={project.coverImage}
                                 alt={project.title}
                                 className="w-full h-full object-cover"
                             />
+                            {/* Floating Share Button */}
+                            <button
+                                onClick={() => setShowShareModal(true)}
+                                className="absolute top-3 right-3 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all hover:scale-105 active:scale-95 group"
+                                title="Share Project"
+                            >
+                                <Share2 className="h-4 w-4 text-white/90 group-hover:text-white" />
+                            </button>
                         </div>
                     )}
 
@@ -246,6 +274,29 @@ export function ProjectPage() {
                     projectId={project._id}
                     projectSlug={slug as string}
                     postCount={project.posts?.length || 0}
+                />
+            )}
+
+            {/* Share Modal */}
+            {project && (
+                <ShareModal
+                    open={showShareModal}
+                    onOpenChange={setShowShareModal}
+                    type="project"
+                    projectData={{
+                        slug: project.slug || project._id,
+                        title: project.title,
+                        coverImage: project.coverImage,
+                        description: project.description,
+                        owner: {
+                            username: project.user?.username || '',
+                            name: project.user?.name,
+                            avatar: project.user?.avatar,
+                        },
+                        watchersCount: project.followers?.length || 0,
+                        postsCount: project.posts?.length || 0,
+                        categories: project.categories,
+                    }}
                 />
             )}
         </div>

@@ -135,15 +135,14 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                             key={file._id}
                             className="group relative bg-card rounded-xl border border-border/50 hover:border-border hover:shadow-lg transition-all duration-200 overflow-hidden"
                         >
-                            <div className="p-4">
-                                <div className="flex items-start gap-4">
-                                    {/* File icon - Enhanced with gradient background */}
+                            <div className="p-3">
+                                <div className="flex items-start gap-3">
                                     <div
                                         className="flex-shrink-0 cursor-pointer"
                                         onClick={() => setPreviewFile(file)}
                                     >
-                                        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/10 group-hover:ring-primary/30 transition-all">
-                                            <FileIcon className="h-7 w-7 text-primary" />
+                                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/10 group-hover:ring-primary/30 transition-all">
+                                            <FileIcon className="h-5 w-5 text-primary" />
                                         </div>
                                     </div>
 
@@ -153,35 +152,36 @@ export function FilesList({ projectId, isTeamMember = false }: FilesListProps) {
                                             <div className="flex-1 min-w-0">
                                                 {/* File name */}
                                                 <h4
-                                                    className="font-semibold text-base truncate cursor-pointer hover:text-primary transition-colors"
+                                                    className="font-medium text-sm truncate cursor-pointer hover:text-primary transition-colors"
                                                     onClick={() => setPreviewFile(file)}
                                                 >
                                                     {file.originalFileName}
                                                 </h4>
 
                                                 {/* Metadata row */}
-                                                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                                                    <span className="text-sm text-muted-foreground font-medium">
+                                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                    <span className="text-xs text-muted-foreground font-medium">
                                                         {formatFileSize(file.fileSize)}
                                                     </span>
-                                                    <Badge className={`${categoryColor} text-xs font-medium px-2 py-0.5`}>
+                                                    <Badge className={`${categoryColor} text-[10px] font-medium px-1.5 py-0 h-5`}>
                                                         {category}
                                                     </Badge>
                                                 </div>
 
-                                                {/* Uploader info - Cleaner styling */}
+                                                {/* Uploader info - Compact styling */}
                                                 {file.uploadedBy && (
-                                                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+                                                    <div className="flex items-center gap-1.5 mt-1.5">
                                                         <UserAvatar
                                                             src={file.uploadedBy.avatar}
                                                             name={file.uploadedBy.name}
                                                             username={file.uploadedBy.username}
                                                             size="xs"
+                                                            className="h-4 w-4 text-[9px]"
                                                         />
-                                                        <span className="text-sm text-muted-foreground">
+                                                        <span className="text-xs text-muted-foreground truncate max-w-[150px]">
                                                             {file.uploadedBy.name}
                                                         </span>
-                                                        <span className="hidden sm:inline text-xs text-muted-foreground/60">
+                                                        <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">
                                                             • {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}
                                                         </span>
                                                     </div>

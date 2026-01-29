@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 
-import { GraduationCap, School, Egg, Rocket, Star, Flame, Zap, Crown, Trophy } from 'lucide-react';
+import { GraduationCap, School, Egg, Rocket, Star, Flame, Zap, Crown, Trophy, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { SocialLinks } from './social-links';
+import { ShareModal } from '@/components/share-modal';
 import type { User as UserType } from '../types';
 
 // Rank definitions based on hatch points
@@ -66,6 +67,7 @@ export function ProfileSidebar({
     const rankInfo = getRank(hatchPoints);
     const RankIcon = rankInfo.icon;
     const [achievementsExpanded, setAchievementsExpanded] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     return (
         <Card className="overflow-hidden pt-0">
@@ -85,6 +87,15 @@ export function ProfileSidebar({
                         </p>
                     </div>
                 )}
+
+                {/* Floating Share Button */}
+                <button
+                    onClick={() => setShowShareModal(true)}
+                    className="absolute top-2 right-2 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all hover:scale-105 active:scale-95 group"
+                    title="Share Profile"
+                >
+                    <Share2 className="h-4 w-4 text-white/90 group-hover:text-white" />
+                </button>
             </div>
 
             <CardContent className="relative pt-0 pb-3 px-4">
@@ -106,7 +117,7 @@ export function ProfileSidebar({
                     />
 
                     <div className="pb-2 min-w-0">
-                        <h2 className="text-xl font-bold truncate">{user.name || user.username}</h2>
+                        <h2 className="text-lg font-bold leading-tight break-words">{user.name || user.username}</h2>
                         <p className="text-sm text-muted-foreground truncate">@{user.username}</p>
                     </div>
                 </div>
@@ -289,6 +300,23 @@ export function ProfileSidebar({
                     </Button>
                 )}
             </CardContent>
+
+            {/* Share Modal */}
+            <ShareModal
+                open={showShareModal}
+                onOpenChange={setShowShareModal}
+                type="profile"
+                profileData={{
+                    username: user.username,
+                    name: user.name,
+                    avatar: user.avatar,
+                    bio: user.bio,
+                    hatchPoints: user.hatchPoints,
+                    projectsCount,
+                    followersCount: user.followers?.length || 0,
+                    interests: user.interests || [],
+                }}
+            />
         </Card>
     );
 }
