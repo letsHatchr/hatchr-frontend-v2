@@ -100,6 +100,7 @@ export function ShareModal({
     projectData,
 }: ShareModalProps) {
     const [copied, setCopied] = useState(false);
+    const [showOgPreview, setShowOgPreview] = useState(true);
 
     // Reset copied state when modal closes
     useEffect(() => {
@@ -113,6 +114,12 @@ export function ShareModal({
     const shareTitle = type === 'profile'
         ? `Check out ${profileData?.name || profileData?.username}'s profile on Hatchr`
         : `Check out ${projectData?.title} on Hatchr`;
+
+    // OG Image URL from backend
+    const apiBase = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || 'http://localhost:5000';
+    const ogImageUrl = type === 'profile'
+        ? `${apiBase}/api/og/profile/${profileData?.username}.png`
+        : `${apiBase}/api/og/project/${projectData?.slug}.png`;
 
     const handleCopyLink = async () => {
         try {
@@ -142,7 +149,7 @@ export function ShareModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Share2 className="h-5 w-5" />
@@ -151,12 +158,67 @@ export function ShareModal({
                 </DialogHeader>
 
                 <div className="space-y-4 w-full min-w-0">
-                    {/* Preview Card */}
-                    {type === 'profile' && profileData && (
-                        <ProfilePreviewCard data={profileData} />
+                    {/* Toggle between OG Preview and Card Preview */}
+                    <div className="flex gap-2 text-xs">
+                        <button
+                            onClick={() => setShowOgPreview(true)}
+                            className={`px-3 py-1.5 rounded-full transition-colors ${showOgPreview
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                }`}
+                        >
+                            📱 Social Preview
+                        </button>
+                        <button
+                            onClick={() => setShowOgPreview(false)}
+                            className={`px-3 py-1.5 rounded-full transition-colors ${!showOgPreview
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                }`}
+                        >
+                            📋 Details
+                        </button>
+                    </div>
+
+                    {/* OG Image Preview - How it looks on Twitter/LinkedIn */}
+                    {showOgPreview && (
+                        <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground">
+                                How your link appears on Twitter, LinkedIn, WhatsApp, etc.
+                            </p>
+                            <div className="rounded-lg overflow-hidden border bg-card">
+                                <img
+                                    src={ogImageUrl}
+                                    alt="Link preview"
+                                    className="w-full aspect-[1200/630] object-cover bg-muted"
+                                    onError={(e) => {
+                                        // Fallback if OG image fails to load
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                />
+                                <div className="p-3 border-t">
+                                    <p className="text-xs text-muted-foreground truncate">hatchr.in</p>
+                                    <p className="text-sm font-medium truncate">
+                                        {type === 'profile'
+                                            ? `${profileData?.name || profileData?.username} | Hatchr`
+                                            : `${projectData?.title} | Hatchr`
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     )}
-                    {type === 'project' && projectData && (
-                        <ProjectPreviewCard data={projectData} />
+
+                    {/* Original Preview Cards */}
+                    {!showOgPreview && (
+                        <>
+                            {type === 'profile' && profileData && (
+                                <ProfilePreviewCard data={profileData} />
+                            )}
+                            {type === 'project' && projectData && (
+                                <ProjectPreviewCard data={projectData} />
+                            )}
+                        </>
                     )}
 
                     {/* Share URL */}
