@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from '@tanstack/react-router';
-import { Plus, LogOut, User, Settings, Eye, Bell, Menu, Compass, ChevronDown } from 'lucide-react';
+import { Plus, LogOut, User, Settings, Eye, Bell, Menu, Search, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { UserAvatar } from '@/components/user-avatar';
@@ -20,6 +20,7 @@ import { CreateProjectModal } from '@/features/project/components/create-project
 import { CreatePostModal } from '@/features/project/components/create-post-modal';
 import { useUnreadCount } from '@/features/notifications/hooks/use-notifications';
 import { SearchInput } from '@/components/search-input';
+
 
 export function Navbar() {
     const navigate = useNavigate();
@@ -70,17 +71,17 @@ export function Navbar() {
 
                 {isAuthenticated && user ? (
                     <div className="flex items-center gap-2">
+                        <Link to="/search" search={{ q: '' }} className="lg:hidden">
+                            <button className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-all focus:outline-none" title="Search">
+                                <Search className="h-6 w-6 shrink-0" />
+                            </button>
+                        </Link>
                         <Link to="/notifications">
                             <button className="group relative flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-all focus:outline-none" title="Notifications">
                                 <Bell className="h-6 w-6 shrink-0" />
                                 {unreadCount > 0 && (
                                     <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-background animate-pulse" />
                                 )}
-                            </button>
-                        </Link>
-                        <Link to="/discover" className="lg:hidden">
-                            <button className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-all focus:outline-none" title="Discover">
-                                <Compass className="h-6 w-6 shrink-0" />
                             </button>
                         </Link>
                         <Link to="/watching">
