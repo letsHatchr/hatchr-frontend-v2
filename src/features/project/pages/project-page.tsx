@@ -19,7 +19,6 @@ import { generateHTML } from '@tiptap/html';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import { SeoHead } from '@/components/seo-head';
-import { ShareModal } from '@/components/share-modal';
 
 // Helper function to render description (handles both Tiptap JSON and plain HTML/text)
 const renderDescription = (description: string | undefined): string => {
@@ -55,7 +54,16 @@ export function ProjectPage() {
     const unwatchMutation = useUnwatchProject();
 
     const [showPostModal, setShowPostModal] = useState(false);
-    const [showShareModal, setShowShareModal] = useState(false);
+
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/project/${project?.slug || slug}`;
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            toast.success('Link copied!');
+        } catch {
+            toast.error('Failed to copy link');
+        }
+    };
 
     // Auto-open create post modal if coming from "Hatch Project" flow
     useEffect(() => {
@@ -146,7 +154,7 @@ export function ProjectPage() {
                     />
                     {/* Floating Share Button */}
                     <button
-                        onClick={() => setShowShareModal(true)}
+                        onClick={handleShare}
                         className="absolute top-3 right-3 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all hover:scale-105 active:scale-95 group"
                         title="Share Project"
                     >
@@ -180,7 +188,7 @@ export function ProjectPage() {
                             />
                             {/* Floating Share Button */}
                             <button
-                                onClick={() => setShowShareModal(true)}
+                                onClick={handleShare}
                                 className="absolute top-3 right-3 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all hover:scale-105 active:scale-95 group"
                                 title="Share Project"
                             >
@@ -277,28 +285,6 @@ export function ProjectPage() {
                 />
             )}
 
-            {/* Share Modal */}
-            {project && (
-                <ShareModal
-                    open={showShareModal}
-                    onOpenChange={setShowShareModal}
-                    type="project"
-                    projectData={{
-                        slug: project.slug || project._id,
-                        title: project.title,
-                        coverImage: project.coverImage,
-                        description: project.description,
-                        owner: {
-                            username: project.user?.username || '',
-                            name: project.user?.name,
-                            avatar: project.user?.avatar,
-                        },
-                        watchersCount: project.followers?.length || 0,
-                        postsCount: project.posts?.length || 0,
-                        categories: project.categories,
-                    }}
-                />
-            )}
         </div>
     );
 }

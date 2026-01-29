@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-
 import { GraduationCap, School, Egg, Rocket, Star, Flame, Zap, Crown, Trophy, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { SocialLinks } from './social-links';
-import { ShareModal } from '@/components/share-modal';
+import { toast } from '@/lib/toast';
 import type { User as UserType } from '../types';
 
 // Rank definitions based on hatch points
@@ -67,7 +66,16 @@ export function ProfileSidebar({
     const rankInfo = getRank(hatchPoints);
     const RankIcon = rankInfo.icon;
     const [achievementsExpanded, setAchievementsExpanded] = useState(false);
-    const [showShareModal, setShowShareModal] = useState(false);
+
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/${user.username}`;
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            toast.success('Link copied!');
+        } catch {
+            toast.error('Failed to copy link');
+        }
+    };
 
     return (
         <Card className="overflow-hidden pt-0">
@@ -90,7 +98,7 @@ export function ProfileSidebar({
 
                 {/* Floating Share Button */}
                 <button
-                    onClick={() => setShowShareModal(true)}
+                    onClick={handleShare}
                     className="absolute top-2 right-2 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all hover:scale-105 active:scale-95 group"
                     title="Share Profile"
                 >
@@ -301,22 +309,6 @@ export function ProfileSidebar({
                 )}
             </CardContent>
 
-            {/* Share Modal */}
-            <ShareModal
-                open={showShareModal}
-                onOpenChange={setShowShareModal}
-                type="profile"
-                profileData={{
-                    username: user.username,
-                    name: user.name,
-                    avatar: user.avatar,
-                    bio: user.bio,
-                    hatchPoints: user.hatchPoints,
-                    projectsCount,
-                    followersCount: user.followers?.length || 0,
-                    interests: user.interests || [],
-                }}
-            />
         </Card>
     );
 }
