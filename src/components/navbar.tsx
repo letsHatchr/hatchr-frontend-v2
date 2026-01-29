@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from '@tanstack/react-router';
-import { Plus, LogOut, User, Settings, Eye, Bell, Menu, Compass } from 'lucide-react';
+import { Plus, LogOut, User, Settings, Eye, Bell, Menu, Compass, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { UserAvatar } from '@/components/user-avatar';
@@ -91,13 +91,15 @@ export function Navbar() {
                         <DropdownMenu>
                             <DropdownMenuTrigger className="focus:outline-none ml-1">
                                 <Menu className="h-6 w-6 lg:hidden" />
-                                <div className="hidden lg:block">
+                                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 hover:border-orange-500/50 hover:from-orange-500/15 hover:to-amber-500/15 transition-all cursor-pointer">
                                     <UserAvatar
                                         src={user.avatar}
                                         name={user.name}
                                         username={user.username}
-                                        size="md"
+                                        size="sm"
                                     />
+                                    <span className="text-sm font-medium">Portfolio</span>
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                 </div>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
