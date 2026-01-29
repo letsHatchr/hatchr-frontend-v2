@@ -9,7 +9,7 @@ import { UserAvatar } from '@/components/user-avatar';
 const navItems = [
     { href: '/feed', icon: Home, label: 'Home' },
     { href: '/search', icon: Search, label: 'Search' },
-    { href: '/create', icon: PlusSquare, label: 'Post', isAction: true },
+    { href: '/create', icon: PlusSquare, label: 'Update', isAction: true },
     { href: '/leaderboard', icon: Trophy, label: 'Ranks' },
 ];
 
@@ -42,7 +42,7 @@ export function MobileBottomNav() {
                     };
 
                     if (item.isAction) {
-                        // Center action button (Create Post)
+                        // Center action button (Add Update)
                         return (
                             <a
                                 key={item.href}
@@ -86,7 +86,7 @@ export function MobileBottomNav() {
                         username={user?.username || ''}
                         className="h-5 w-5 text-foreground"
                     />
-                    <span className="text-[10px]">Profile</span>
+                    <span className="text-[10px]">Portfolio</span>
                 </a>
             </div>
         </nav>

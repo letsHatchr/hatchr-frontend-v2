@@ -111,7 +111,7 @@ export function SettingsProfilePage() {
                 data: formattedData
             });
 
-            toast.success('Profile updated successfully');
+            toast.success('Portfolio updated successfully');
         } catch (error) {
             toast.error('Failed to update profile');
         }
@@ -138,7 +138,7 @@ export function SettingsProfilePage() {
         try {
             if (type === 'avatar') {
                 await uploadAvatarMutation.mutateAsync(file);
-                toast.success('Profile picture updated!');
+                toast.success('Avatar updated!');
             } else {
                 await uploadBannerMutation.mutateAsync(file);
                 toast.success('Banner image updated!');
@@ -184,7 +184,7 @@ export function SettingsProfilePage() {
                             onClick={() => setActiveSection('profile')}
                         >
                             <User className="mr-2 h-4 w-4" />
-                            Profile Settings
+                            Portfolio Settings
                         </Button>
                         <Button
                             variant={activeSection === 'email' ? 'secondary' : 'ghost'}
@@ -202,9 +202,9 @@ export function SettingsProfilePage() {
                     {activeSection === 'profile' && (
                         <div className="space-y-6 animate-in fade-in-50 duration-500">
                             <div>
-                                <h2 className="text-2xl font-semibold tracking-tight">Profile Settings</h2>
+                                <h2 className="text-2xl font-semibold tracking-tight">Portfolio Settings</h2>
                                 <p className="text-muted-foreground">
-                                    Update your public profile information.
+                                    Update your public portfolio information.
                                 </p>
                             </div>
 
@@ -219,9 +219,9 @@ export function SettingsProfilePage() {
                                     <TabsContent value="general" className="space-y-6 mt-6">
                                         <Card>
                                             <CardHeader>
-                                                <CardTitle>Public Profile</CardTitle>
+                                                <CardTitle>Public Portfolio</CardTitle>
                                                 <CardDescription>
-                                                    This information will be displayed publicly on your profile.
+                                                    This information will be displayed publicly on your portfolio.
                                                 </CardDescription>
                                             </CardHeader>
                                             <CardContent className="space-y-6">

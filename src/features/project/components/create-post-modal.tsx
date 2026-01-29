@@ -234,7 +234,7 @@ export function CreatePostModal({ open, onOpenChange, projectId, post, postCount
                         { duration: 5000 }
                     );
                 } else {
-                    toast.success("Post created successfully!");
+                    toast.success("Update published successfully!");
                 }
 
                 onOpenChange(false);
@@ -245,7 +245,7 @@ export function CreatePostModal({ open, onOpenChange, projectId, post, postCount
                 if (!projectId) setSelectedProject('');
             }
         } catch (error) {
-            toast.error(post ? "Failed to update post" : "Failed to create post");
+            toast.error(post ? "Failed to update" : "Failed to publish update");
             console.error(error);
         }
     };
@@ -276,10 +276,10 @@ export function CreatePostModal({ open, onOpenChange, projectId, post, postCount
                         </div>
                         <div>
                             <DialogTitle className="text-xl">
-                                {post ? "Edit Post" : (isFirstPost ? "Hatch Your Project" : "Create New Post")}
+                                {post ? "Edit Update" : (isFirstPost ? "Hatch Your Project" : "Add Project Update")}
                             </DialogTitle>
                             <p className="text-sm text-muted-foreground mt-0.5">
-                                {post ? "Update your post content" : (isFirstPost ? "Announce your new project to the world" : "Share updates with your followers")}
+                                {post ? "Update your content" : (isFirstPost ? "Announce your new project to the world" : "Share your project progress")}
                             </p>
                         </div>
                     </div>
@@ -536,7 +536,7 @@ export function CreatePostModal({ open, onOpenChange, projectId, post, postCount
                             ) : (
                                 <>
                                     <Sparkles className="h-4 w-4" />
-                                    {post ? "Save Changes" : "Publish Post"}
+                                    {post ? "Save Changes" : "Publish Update"}
                                 </>
                             )}
                         </Button>

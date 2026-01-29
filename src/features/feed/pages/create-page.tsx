@@ -32,7 +32,7 @@ export function CreatePage() {
                 Back
             </Button>
 
-            <h1 className="text-2xl font-bold mb-6 text-center">Create Something New</h1>
+            <h1 className="text-2xl font-bold mb-6 text-center">Add Something New</h1>
 
             <div className="space-y-4">
                 {/* Create Project Card */}
@@ -53,7 +53,7 @@ export function CreatePage() {
                     </CardHeader>
                 </Card>
 
-                {/* Create Post Card */}
+                {/* Add Update Card */}
                 <Card
                     className="cursor-pointer hover:border-primary transition-colors"
                     onClick={() => setShowPostModal(true)}
@@ -64,8 +64,8 @@ export function CreatePage() {
                                 <FileText className="h-6 w-6 text-blue-500" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg">New Post</CardTitle>
-                                <CardDescription>Share an update on one of your projects</CardDescription>
+                                <CardTitle className="text-lg">Add Update</CardTitle>
+                                <CardDescription>Share progress on your projects</CardDescription>
                             </div>
                         </div>
                     </CardHeader>

@@ -58,7 +58,7 @@ export function Navbar() {
                         <>
                             <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowCreatePostModal(true)}>
                                 <Plus className="h-4 w-4" />
-                                Create Post
+                                Add Update
                             </Button>
                             <Button size="sm" className="gap-2" onClick={() => setShowCreateProjectModal(true)}>
                                 <Plus className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function Navbar() {
                                     <Link to="/$username" params={{ username: user.username }}>
                                         <DropdownMenuItem>
                                             <User className="mr-2 h-4 w-4" />
-                                            <span>Profile</span>
+                                            <span>Portfolio</span>
                                         </DropdownMenuItem>
                                     </Link>
                                     <Link to="/settings/profile">
