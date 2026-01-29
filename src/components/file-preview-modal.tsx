@@ -54,6 +54,7 @@ export function FilePreviewModal({ open, onOpenChange, file }: FilePreviewModalP
     const [downloadLoading, setDownloadLoading] = useState(false);
 
     const fileType = file?.fileType || '';
+    const isNotebook = file?.originalFileName.endsWith('.ipynb');
     const isCode = fileType.includes('javascript') ||
         fileType.includes('typescript') ||
         fileType.includes('json') ||
@@ -64,7 +65,8 @@ export function FilePreviewModal({ open, onOpenChange, file }: FilePreviewModalP
         file?.originalFileName.endsWith('.java') ||
         file?.originalFileName.endsWith('.c') ||
         file?.originalFileName.endsWith('.cpp') ||
-        file?.originalFileName.endsWith('.md');
+        file?.originalFileName.endsWith('.md') ||
+        isNotebook;
 
     // Simple language detection based on extension
     const getLanguage = (fileName: string) => {
@@ -159,7 +161,10 @@ export function FilePreviewModal({ open, onOpenChange, file }: FilePreviewModalP
                         </div>
                     )}
 
-                    {isCode ? (
+                    {isNotebook && content ? (
+                        // Jupyter Notebook preview
+                        <NotebookPreview content={content} />
+                    ) : isCode ? (
                         error ? (
                             <div className="flex flex-col items-center justify-center h-full gap-2 text-destructive p-4 text-center">
                                 <AlertCircle className="h-8 w-8 mb-2" />
@@ -274,3 +279,157 @@ function ImagePreview({ fileId, fileName }: { fileId: string; fileName: string }
     );
 }
 
+// Component to render Jupyter Notebook (.ipynb) files
+function NotebookPreview({ content }: { content: string }) {
+    interface NotebookOutput {
+        output_type: string;
+        text?: string[] | string;
+        data?: {
+            'text/plain'?: string[] | string;
+            'text/html'?: string[] | string;
+            'image/png'?: string;
+            'image/jpeg'?: string;
+        };
+        traceback?: string[];
+    }
+
+    interface NotebookCell {
+        cell_type: 'code' | 'markdown' | 'raw';
+        source: string[] | string;
+        outputs?: NotebookOutput[];
+        execution_count?: number | null;
+    }
+
+    interface Notebook {
+        cells: NotebookCell[];
+        metadata?: {
+            kernelspec?: {
+                display_name?: string;
+                language?: string;
+            };
+        };
+    }
+
+    let notebook: Notebook | null = null;
+    let parseError: string | null = null;
+
+    try {
+        notebook = JSON.parse(content) as Notebook;
+    } catch (e) {
+        parseError = 'Failed to parse notebook file';
+    }
+
+    if (parseError || !notebook) {
+        return (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+                {parseError || 'Invalid notebook format'}
+            </div>
+        );
+    }
+
+    const getCellSource = (source: string[] | string): string => {
+        return Array.isArray(source) ? source.join('') : source;
+    };
+
+    const getOutputText = (output: NotebookOutput): string | null => {
+        if (output.text) {
+            return Array.isArray(output.text) ? output.text.join('') : output.text;
+        }
+        if (output.data?.['text/plain']) {
+            const text = output.data['text/plain'];
+            return Array.isArray(text) ? text.join('') : text;
+        }
+        return null;
+    };
+
+    const getOutputImage = (output: NotebookOutput): string | null => {
+        if (output.data?.['image/png']) {
+            return `data:image/png;base64,${output.data['image/png']}`;
+        }
+        if (output.data?.['image/jpeg']) {
+            return `data:image/jpeg;base64,${output.data['image/jpeg']}`;
+        }
+        return null;
+    };
+
+    return (
+        <div className="h-full overflow-auto p-4 space-y-4 bg-[#1e1e1e]">
+            {/* Notebook metadata */}
+            {notebook.metadata?.kernelspec && (
+                <div className="text-xs text-muted-foreground mb-4 pb-2 border-b border-border">
+                    Kernel: {notebook.metadata.kernelspec.display_name || notebook.metadata.kernelspec.language || 'Unknown'}
+                </div>
+            )}
+
+            {/* Render cells */}
+            {notebook.cells.map((cell, index) => (
+                <div key={index} className="rounded-lg overflow-hidden border border-border/50">
+                    {/* Cell type indicator */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/30 text-xs text-muted-foreground border-b border-border/50">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${cell.cell_type === 'code' ? 'bg-blue-500/20 text-blue-400' :
+                            cell.cell_type === 'markdown' ? 'bg-green-500/20 text-green-400' :
+                                'bg-gray-500/20 text-gray-400'
+                            }`}>
+                            {cell.cell_type}
+                        </span>
+                        {cell.cell_type === 'code' && cell.execution_count !== null && cell.execution_count !== undefined && (
+                            <span className="text-muted-foreground">[{cell.execution_count}]</span>
+                        )}
+                    </div>
+
+                    {/* Cell content */}
+                    <div className="p-0">
+                        {cell.cell_type === 'code' ? (
+                            <SyntaxHighlighter
+                                language="python"
+                                style={vscDarkPlus}
+                                customStyle={{ margin: 0, padding: '12px', fontSize: '13px', background: '#1e1e1e' }}
+                                showLineNumbers={false}
+                            >
+                                {getCellSource(cell.source)}
+                            </SyntaxHighlighter>
+                        ) : cell.cell_type === 'markdown' ? (
+                            <div className="p-3 prose prose-sm prose-invert max-w-none text-gray-200">
+                                <pre className="whitespace-pre-wrap font-sans text-sm">{getCellSource(cell.source)}</pre>
+                            </div>
+                        ) : (
+                            <pre className="p-3 text-sm text-gray-300 whitespace-pre-wrap">{getCellSource(cell.source)}</pre>
+                        )}
+                    </div>
+
+                    {/* Cell outputs (for code cells) */}
+                    {cell.cell_type === 'code' && cell.outputs && cell.outputs.length > 0 && (
+                        <div className="border-t border-border/50 bg-[#252526]">
+                            <div className="px-3 py-1 text-[10px] text-muted-foreground border-b border-border/30">Output</div>
+                            <div className="p-3 space-y-2">
+                                {cell.outputs.map((output, outIndex) => {
+                                    const text = getOutputText(output);
+                                    const image = getOutputImage(output);
+
+                                    if (output.output_type === 'error' && output.traceback) {
+                                        return (
+                                            <pre key={outIndex} className="text-xs text-red-400 whitespace-pre-wrap overflow-x-auto">
+                                                {output.traceback.join('\n').replace(/\x1b\[[0-9;]*m/g, '')}
+                                            </pre>
+                                        );
+                                    }
+
+                                    return (
+                                        <div key={outIndex}>
+                                            {text && (
+                                                <pre className="text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto">{text}</pre>
+                                            )}
+                                            {image && (
+                                                <img src={image} alt={`Output ${outIndex}`} className="max-w-full rounded" />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
