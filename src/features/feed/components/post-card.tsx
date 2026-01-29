@@ -45,9 +45,10 @@ interface PostCardProps {
     post: Post | ProjectPost;
     showProject?: boolean;
     variant?: 'feed' | 'timeline';
+    isFirst?: boolean;
 }
 
-export function PostCard({ post, showProject = true, variant = 'feed' }: PostCardProps) {
+export function PostCard({ post, showProject = true, variant = 'feed', isFirst = false }: PostCardProps) {
     const { user: currentUser, isAuthenticated, openLoginModal } = useAuthStore();
     const votePost = useVotePost();
     const deletePost = useDeletePost();
@@ -143,7 +144,10 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
             "overflow-hidden py-0 gap-0 shadow-none",
             isTimeline
                 ? "bg-card rounded-xl border mb-1"
-                : "bg-card rounded-none border-x-0 sm:border-x border-t-0 border-b border-border/50"
+                : cn(
+                    "bg-card rounded-none border-x-0 sm:border-x border-t-0 border-b border-border/50",
+                    isFirst && "rounded-t-lg"
+                )
         )}>
             <CardHeader className={cn(isTimeline ? "p-3 pb-0" : "p-3 sm:p-5 pb-0")}>
                 <div className="flex items-start gap-3 w-full max-w-full">
@@ -255,7 +259,7 @@ export function PostCard({ post, showProject = true, variant = 'feed' }: PostCar
                         >
                             <h3 className={cn(
                                 "font-semibold hover:underline decoration-2 underline-offset-2 leading-tight",
-                                isTimeline ? "text-lg" : "text-base mb-0"
+                                isTimeline ? "text-base" : "text-base mb-0"
                             )}>
                                 {post.title}
                             </h3>

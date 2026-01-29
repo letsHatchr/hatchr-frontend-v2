@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from '@tanstack/react-router';
 import { X, Upload, Loader2, FolderPlus, Type, FileText, Tags, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,8 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { TiptapEditor } from '@/components/editor/tiptap-editor';
 import { cn } from '@/lib/utils';
 
 interface CreateProjectModalProps {
@@ -38,7 +38,7 @@ export function CreateProjectModal({ open, onOpenChange, project }: CreateProjec
     const createProjectMutation = useCreateProject();
     const updateProjectMutation = useUpdateProject();
 
-    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<ProjectFormData>({
+    const { register, control, handleSubmit, reset, setValue, formState: { errors } } = useForm<ProjectFormData>({
         defaultValues: {
             title: project?.title || '',
             description: project?.description || ''
@@ -111,6 +111,7 @@ export function CreateProjectModal({ open, onOpenChange, project }: CreateProjec
         const formData = new FormData();
         formData.append('title', data.title);
         formData.append('description', data.description);
+        formData.append('descriptionFormat', 'tiptap');
         formData.append('categories', JSON.stringify(categories));
 
         if (coverImage) {
@@ -245,11 +246,18 @@ export function CreateProjectModal({ open, onOpenChange, project }: CreateProjec
                             <FileText className="h-4 w-4 text-muted-foreground" />
                             <Label htmlFor="description" className="text-sm font-medium">Description</Label>
                         </div>
-                        <Textarea
-                            id="description"
-                            placeholder="What problem does your project solve? What makes it unique?"
-                            className="min-h-[100px] resize-none"
-                            {...register('description', { required: 'Description is required' })}
+                        <Controller
+                            name="description"
+                            control={control}
+                            rules={{ required: 'Description is required' }}
+                            render={({ field }) => (
+                                <TiptapEditor
+                                    content={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="What problem does your project solve? What makes it unique?"
+                                    minHeight="120px"
+                                />
+                            )}
                         />
                         {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
                     </div>

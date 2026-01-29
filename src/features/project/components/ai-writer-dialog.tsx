@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Loader2, Sparkles, Wand2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -27,11 +27,37 @@ interface AIWriterDialogProps {
     onGenerate: (content: string) => void;
 }
 
+interface UsageData {
+    remaining: number;
+    limit: number;
+    resetAt: string | null;
+}
+
 export function AIWriterDialog({ open, onOpenChange, onGenerate }: AIWriterDialogProps) {
     const [topic, setTopic] = useState('');
     const [tone, setTone] = useState('casual');
     const [length, setLength] = useState('medium');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [usage, setUsage] = useState<UsageData | null>(null);
+
+    // Fetch usage when dialog opens
+    useEffect(() => {
+        if (open) {
+            api.get('/ai/usage')
+                .then(res => {
+                    if (res.data.success) {
+                        setUsage({
+                            remaining: res.data.data.remaining,
+                            limit: res.data.data.limit,
+                            resetAt: res.data.data.resetAt,
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to fetch AI usage:', err);
+                });
+        }
+    }, [open]);
 
     const handleGenerate = async () => {
         if (!topic.trim()) {
@@ -52,6 +78,14 @@ export function AIWriterDialog({ open, onOpenChange, onGenerate }: AIWriterDialo
                 // Handle nested data structure { success: true, data: { html: ..., content: ... } }
                 // Prioritize HTML if available, as that contains the marked-processed content
                 const content = response.data.data?.html || response.data.data?.content || response.data.html || response.data.content;
+
+                // Update usage from response
+                if (response.data.data?.usage) {
+                    setUsage(prev => ({
+                        ...prev!,
+                        remaining: response.data.data.usage.remaining,
+                    }));
+                }
 
                 if (content) {
                     onGenerate(content);
@@ -86,6 +120,20 @@ export function AIWriterDialog({ open, onOpenChange, onGenerate }: AIWriterDialo
                     <DialogDescription>
                         Describe what you want to post about, and let AI write a draft for you.
                     </DialogDescription>
+                    {usage && (
+                        <div className={`flex items-center gap-2 mt-2 text-sm ${usage.remaining === 0 ? 'text-red-500' :
+                                usage.remaining <= 2 ? 'text-amber-500' : 'text-muted-foreground'
+                            }`}>
+                            {usage.remaining === 0 ? (
+                                <AlertCircle className="h-4 w-4" />
+                            ) : (
+                                <Sparkles className="h-4 w-4" />
+                            )}
+                            <span>
+                                {usage.remaining}/{usage.limit} generations left today
+                            </span>
+                        </div>
+                    )}
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
@@ -140,8 +188,8 @@ export function AIWriterDialog({ open, onOpenChange, onGenerate }: AIWriterDialo
                     </Button>
                     <Button
                         onClick={handleGenerate}
-                        disabled={isGenerating || !topic.trim()}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        disabled={isGenerating || !topic.trim() || (usage?.remaining === 0)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
                     >
                         {isGenerating ? (
                             <>

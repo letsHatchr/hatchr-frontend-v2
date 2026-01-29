@@ -279,8 +279,8 @@ export function TiptapEditor({
         })() : undefined,
         editable,
         onUpdate: ({ editor }) => {
-            const json = JSON.stringify(editor.getJSON());
-            onChange?.(json);
+            const html = editor.getHTML();
+            onChange?.(html);
         },
         editorProps: {
             attributes: {

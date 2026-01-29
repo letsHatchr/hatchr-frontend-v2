@@ -176,8 +176,8 @@ export function FeedPage() {
                             </div>
                         ) : (
                             <>
-                                {allPosts.map((post) => (
-                                    <PostCard key={post._id} post={post} />
+                                {allPosts.map((post, index) => (
+                                    <PostCard key={post._id} post={post} isFirst={index === 0} />
                                 ))}
 
                                 {/* Load more trigger */}

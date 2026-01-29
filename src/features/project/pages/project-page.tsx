@@ -15,7 +15,29 @@ import { CreatePostModal } from '../components/create-post-modal';
 import { TeamManagement } from '../components/team-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { generateHTML } from '@tiptap/html';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
 
+// Helper function to render description (handles both Tiptap JSON and plain HTML/text)
+const renderDescription = (description: string | undefined): string => {
+    if (!description) return "No description provided.";
+
+    // Check if it looks like Tiptap JSON (starts with { and contains "type":"doc")
+    if (description.trim().startsWith('{') && description.includes('"type"')) {
+        try {
+            const json = JSON.parse(description);
+            // Generate HTML from Tiptap JSON using the same extensions
+            return generateHTML(json, [StarterKit, Link]);
+        } catch (e) {
+            // If JSON parsing fails, return as-is
+            return description;
+        }
+    }
+
+    // Already HTML or plain text
+    return description;
+};
 
 export function ProjectPage() {
     const { slug } = useParams({ strict: false });
@@ -194,9 +216,12 @@ export function ProjectPage() {
                             <div className="bg-card rounded-lg border p-6 space-y-6">
                                 <div>
                                     <h3 className="text-lg font-semibold mb-2">About this Project</h3>
-                                    <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                                        {project.description || "No description provided."}
-                                    </p>
+                                    <div
+                                        className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground"
+                                        dangerouslySetInnerHTML={{
+                                            __html: renderDescription(project.description)
+                                        }}
+                                    />
                                 </div>
                                 {project.categories && project.categories.length > 0 && (
                                     <div>
