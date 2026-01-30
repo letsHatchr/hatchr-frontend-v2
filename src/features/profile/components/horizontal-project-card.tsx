@@ -10,6 +10,56 @@ interface HorizontalProjectCardProps {
     project: Project;
 }
 
+// Helper to strip HTML tags and extract plain text
+function stripHtmlTags(content: string): string {
+    if (!content) return '';
+
+    // First try to parse as JSON (Tiptap or EditorJS format)
+    try {
+        const parsed = JSON.parse(content);
+
+        // Handle Tiptap JSON
+        if (parsed.type === 'doc' && parsed.content) {
+            return extractTiptapText(parsed).slice(0, 300);
+        }
+
+        // Handle EditorJS
+        if (parsed.blocks && Array.isArray(parsed.blocks)) {
+            return parsed.blocks
+                .map((block: { data?: { text?: string } }) => block.data?.text || '')
+                .join(' ')
+                .replace(/<[^>]*>/g, '')
+                .slice(0, 300);
+        }
+    } catch {
+        // Not JSON, continue with HTML stripping
+    }
+
+    // Strip HTML tags and decode entities
+    return content
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 300);
+}
+
+// Recursive helper for Tiptap nodes
+function extractTiptapText(node: any): string {
+    if (node.type === 'text') {
+        return node.text || '';
+    }
+    if (node.content && Array.isArray(node.content)) {
+        return node.content.map((child: any) => extractTiptapText(child)).join(' ');
+    }
+    return '';
+}
+
 export function HorizontalProjectCard({ project }: HorizontalProjectCardProps) {
     return (
         <a
@@ -77,7 +127,7 @@ export function HorizontalProjectCard({ project }: HorizontalProjectCardProps) {
 
                             {project.description && (
                                 <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                    {project.description}
+                                    {stripHtmlTags(project.description)}
                                 </p>
                             )}
                         </div>
