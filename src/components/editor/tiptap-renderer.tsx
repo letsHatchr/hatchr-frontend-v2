@@ -27,8 +27,17 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
             const parsed: TiptapNode = JSON.parse(content);
             return renderNode(parsed);
         } catch (e) {
-            // If not valid JSON, return as plain text
-            return `<p>${content}</p>`;
+            // If not valid JSON, check if it looks like HTML content
+            const trimmedContent = content.trim();
+
+            // Check if content contains HTML tags (already formatted HTML)
+            if (trimmedContent.includes('<') && trimmedContent.includes('>')) {
+                // Return as-is - it's already HTML
+                return content;
+            }
+
+            // Plain text - wrap in paragraph
+            return `<p>${escapeHtml(content)}</p>`;
         }
     }, [content]);
 

@@ -57,8 +57,22 @@ export function EditorJsRenderer({ content, className }: EditorJsRendererProps) 
             return null;
         }
     } catch (e) {
-        // Fallback for plain text or invalid JSON
+        // Fallback for plain text, HTML, or invalid JSON
         if (typeof content === 'string' && !content.trim().startsWith('{')) {
+            const trimmedContent = content.trim();
+
+            // Check if content contains HTML tags
+            if (trimmedContent.includes('<') && trimmedContent.includes('>')) {
+                // Render as HTML
+                return (
+                    <div
+                        className={cn("text-sm prose prose-sm dark:prose-invert max-w-none", className)}
+                        dangerouslySetInnerHTML={{ __html: content }}
+                    />
+                );
+            }
+
+            // Plain text fallback
             return <p className={cn("text-sm whitespace-pre-wrap", className)}>{content}</p>;
         }
         console.error('Failed to parse EditorJS content', e);

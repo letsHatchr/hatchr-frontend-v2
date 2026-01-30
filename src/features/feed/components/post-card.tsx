@@ -555,6 +555,7 @@ function extractPlainText(content: string): string {
             return parsed.blocks
                 .map((block: { data?: { text?: string } }) => block.data?.text || '')
                 .join(' ')
+                .replace(/<[^>]*>/g, '') // Strip any HTML tags
                 .slice(0, 300);
         }
 
@@ -566,7 +567,21 @@ function extractPlainText(content: string): string {
 
         return content;
     } catch {
-        return content;
+        // If not JSON, check if it's HTML and strip tags
+        if (content.includes('<') && content.includes('>')) {
+            return content
+                .replace(/<[^>]*>/g, '') // Strip HTML tags
+                .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+                .replace(/&amp;/g, '&')  // Decode &amp;
+                .replace(/&lt;/g, '<')   // Decode &lt;
+                .replace(/&gt;/g, '>')   // Decode &gt;
+                .replace(/&quot;/g, '"') // Decode &quot;
+                .replace(/&#039;/g, "'") // Decode &#039;
+                .replace(/\s+/g, ' ')    // Collapse multiple spaces
+                .trim()
+                .slice(0, 300);
+        }
+        return content.slice(0, 300);
     }
 }
 
