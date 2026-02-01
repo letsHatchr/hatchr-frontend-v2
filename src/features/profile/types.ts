@@ -77,6 +77,7 @@ export interface EmailNotificationPreferences {
     newFollowers: boolean;
     weeklySummary: boolean;
     monthlyStats: boolean;
+    sundayDigest: boolean;
 }
 
 export interface Project {

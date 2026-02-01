@@ -27,6 +27,7 @@ export function EmailNotificationsSettings() {
             newFollowers: true,
             weeklySummary: true,
             monthlyStats: true,
+            sundayDigest: true,
         },
     });
 
@@ -43,6 +44,7 @@ export function EmailNotificationsSettings() {
                 newFollowers: user.emailNotifications.newFollowers ?? true,
                 weeklySummary: user.emailNotifications.weeklySummary ?? true,
                 monthlyStats: user.emailNotifications.monthlyStats ?? true,
+                sundayDigest: user.emailNotifications.sundayDigest ?? true,
             });
         }
     }, [user, reset]);
@@ -222,6 +224,21 @@ export function EmailNotificationsSettings() {
                                         <label className="text-base font-medium">Monthly Stats</label>
                                         <p className="text-sm text-muted-foreground">
                                             Receive a monthly deep-dive into your analytics and growth.
+                                        </p>
+                                    </div>
+                                    <Switch checked={value} onCheckedChange={onChange} />
+                                </div>
+                            )}
+                        />
+                        <Controller
+                            control={control}
+                            name="sundayDigest"
+                            render={({ field: { value, onChange } }) => (
+                                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <label className="text-base font-medium">Sunday Digest</label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Get a weekly tech digest every Sunday with trending projects and news.
                                         </p>
                                     </div>
                                     <Switch checked={value} onCheckedChange={onChange} />
